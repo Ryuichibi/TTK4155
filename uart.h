@@ -4,5 +4,6 @@
 #include <avr/io.h>
 
 void uart_send_byte(uint8_t);
-
+int uart_init();
 #endif
+
