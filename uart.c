@@ -2,43 +2,28 @@
 #include <util/delay.h>
 #include <avr/io.h>
 
-#define BAUDRATE 9600
 #define BIT_TIME_US (1000000 / BAUDRATE)
-#define UBRR F_CPU/(16*BAUDRATE) -1
 
-void uart_send_byte(uint8_t byte)
-{
-    //--------------This code is wrong, there is internal harware for using UART, and we only have to work with that----
-    // Start bit (always 0)
-    PORTD &= ~(1 << PA1);
-    _delay_us(BIT_TIME_US);
 
-    for (uint8_t i = 0; i < 8; i++)
-    {
-        PORTD &= ((~(1 << PA1)) | ((byte & (1 << i)) >> i));
-        PORTD = (PORTD & ~(1 << PA1)) | ((byte >> i & 1) << PA1);
-        _delay_us(BIT_TIME_US);
-    }
-
-    // TODO: Do we want parity bit?
-
-    // Stop bit (always 1)
-    PORTD |= (1 << PA1);
-    _delay_us(BIT_TIME_US);
-
+void uart_send_byte(unsigned char data){
+    //Wait until the serial port is ready for sending something new
+    while (!(UCSR0A & (1<<UDRE0)))
+    ;
+    //load new data into sending buffer
+    UDR0 = data;
 }
 
-//-------------this code is not tested, but is worked out from examples in datasheet--------------
     
-int uart_init(){
+int uart_init(int baud){
+    int UBRR = F_CPU/16/baud -1;
     //setting the baudrate:
     UBRR0H = (UBRR >> 8);
-    UBBR0L = UBBR;
+    UBRR0L = UBRR;
     
     //enable RX0 and TX0:
-    UCSR0B = (1<<RXEN) | (1<<TXEN);
+    UCSR0B = (1<<RXEN0) | (1<<TXEN0);
 
     //set frame format.
     //it is currently set to 8 databits, 1 stop bit and none in parity bit
-    UCSR0C = (1<<URSEL) | (3<<UCSZ0);
+    UCSR0C = (1<<URSEL0) | (3<<1);
 }
