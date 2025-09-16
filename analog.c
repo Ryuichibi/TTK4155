@@ -1,9 +1,13 @@
 #include "analog.h"
 
 
-void clk_init(void){
-  WGM01 = 3;
-  COM00 = 2;
-  OCR00 = 1;
+void analog_init(void){
+  DDRD |= (1 << PD4);
+  TCCR3B |= (1 <<WGM32);
+  TCCR3A |= (1 << COM3A0);
+  TCCR3B |= (1 << CS30);
+  OCR3A  = 0;
 
 }
+
+

@@ -10,6 +10,8 @@
 unsigned char data;
 FILE* UART;
 
+
+
 int main() {
 
   UART = uart_init(9600);
@@ -17,7 +19,9 @@ int main() {
   sram_init();
   sram_test();
 
-  clk_init();
+  analog_init();
+    sram_write(6, 15);
+  printf("%d", sram_read(15));
   // DDRA |= (1<< PA0);
   // while (1){
   //   printf("Hello, %d", 12);
