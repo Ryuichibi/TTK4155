@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "uart.h"
 #include "sram.h"
+#include "analog.h"
 
 
 unsigned char data;
@@ -16,6 +17,7 @@ int main() {
   sram_init();
   sram_test();
 
+  clk_init();
   // DDRA |= (1<< PA0);
   // while (1){
   //   printf("Hello, %d", 12);
