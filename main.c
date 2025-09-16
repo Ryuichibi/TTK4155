@@ -16,6 +16,11 @@ int main() {
   sram_init();
   sram_test();
 
+  //data = (unsigned char) uart_receive_byte(UART);
+  //printf("Yes");
+  //sram_write(10, 10);
+  
+
   // DDRA |= (1<< PA0);
   // while (1){
   //   printf("Hello, %d", 12);
