@@ -1,5 +1,7 @@
 #include "analog.h"
 
+#define BASE_ADDR 0x1000
+
 
 void analog_init(void){
   DDRD |= (1 << PD4);
@@ -11,3 +13,14 @@ void analog_init(void){
 }
 
 
+uint8_t analog_read(uint8_t ch) {
+  if (ch) {
+    volatile uint8_t adc = (char *) BASE_ADDR;
+    *adc = ch; // Prob smth else
+    _delay_us(60);
+    return *adc; // Get the value
+
+  } else {
+    return 0;
+  }
+}
