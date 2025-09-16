@@ -15,11 +15,10 @@ void analog_init(void){
 
 uint8_t analog_read(uint8_t ch) {
   if (ch) {
-    volatile uint8_t adc = (char *) BASE_ADDR;
-    *adc = ch; // Prob smth else
-    _delay_us(60);
-    return *adc; // Get the value
-
+    volatile uint8_t *adc = (uint8_t *) BASE_ADDR;
+    adc[0] = (uint8_t) 0b00000000; // Prob smth else
+    _delay_us(29); // tCONV = (9 x N x 2)/fCLK
+    return adc[0]; // Get the value
   } else {
     return 0;
   }

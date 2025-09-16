@@ -17,11 +17,15 @@ int main() {
   UART = uart_init(9600);
 
   sram_init();
-  sram_test();
+  //sram_test();
 
   analog_init();
-    sram_write(6, 15);
-  printf("%d", sram_read(15));
+  //  sram_write(6, 15);
+  //printf("%d", sram_read(15));
+  while (1) {
+    printf("%d\n", analog_read(1));
+  }
+
   // DDRA |= (1<< PA0);
   // while (1){
   //   printf("Hello, %d", 12);
