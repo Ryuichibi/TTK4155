@@ -1,5 +1,5 @@
 # List all source files to be compiled; separate with space
-SOURCE_FILES := main.c uart.c uart.h sram.c sram.h
+SOURCE_FILES := main.c uart.c uart.h sram.c sram.h analog.c analog.h
 
 # Set this flag to "yes" (no quotes) to use JTAG; otherwise ISP (SPI) is used
 PROGRAM_WITH_JTAG := yes
@@ -33,7 +33,7 @@ $(BUILD_DIR)/main.hex: $(OBJECT_FILES) | $(BUILD_DIR)
 
 .PHONY: flash
 flash: $(BUILD_DIR)/main.hex
-	avrdude -p $(TARGET_DEVICE) -c $(PROGRAMMER) -U flash:w:$(BUILD_DIR)/main.hex:i
+	sudo avrdude -p $(TARGET_DEVICE) -c $(PROGRAMMER) -U flash:w:$(BUILD_DIR)/main.hex:i
 
 .PHONY: clean
 clean:

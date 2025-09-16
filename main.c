@@ -4,17 +4,27 @@
 #include <stdio.h>
 #include "uart.h"
 #include "sram.h"
+#include "analog.h"
 
 
 unsigned char data;
 FILE* UART;
+
+
 
 int main() {
 
   UART = uart_init(9600);
 
   sram_init();
-  sram_test();
+  //sram_test();
+
+  analog_init();
+  //  sram_write(6, 15);
+  //printf("%d", sram_read(15));
+  while (1) {
+    printf("%d\n", analog_read(1));
+  }
 
   //data = (unsigned char) uart_receive_byte(UART);
   //printf("Yes");
