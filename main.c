@@ -9,13 +9,14 @@
 
 unsigned char data;
 FILE* UART;
-
-
+struct joystick joystick_1;
+analog_input analog_data;
 
 int main() {
 
   UART = uart_init(9600);
 
+  
   sram_init();
   //sram_test();
 
@@ -23,7 +24,8 @@ int main() {
   //  sram_write(6, 15);
   //printf("%d", sram_read(15));
   while (1) {
-    printf("%d\n", analog_read(1));
+    analog_data = analog_read();
+    printf("x:%d, y: %d\n", analog_data.analog_ch3, analog_data.analog_ch4);
   }
 
   //data = (unsigned char) uart_receive_byte(UART);
