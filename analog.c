@@ -96,7 +96,7 @@ void joystick_calibrate(calib_parameters *calib_parameters) {
 
   }
 
-  printf("Keep joystick in max y position\n");
+  printf("Keep joystick down\n");
 
   _delay_ms(5000);
 
@@ -111,7 +111,7 @@ void joystick_calibrate(calib_parameters *calib_parameters) {
     _delay_ms(10);
   }
 
-  printf("Keep joystick in min y position\n");
+  printf("Keep joystick up\n");
 
   _delay_ms(5000);
 
@@ -126,7 +126,7 @@ void joystick_calibrate(calib_parameters *calib_parameters) {
     _delay_ms(10);
   }
 
-  printf("Keep joystick in max x position\n");
+  printf("Keep joystick left\n");
 
   _delay_ms(5000);
 
@@ -141,7 +141,7 @@ void joystick_calibrate(calib_parameters *calib_parameters) {
     _delay_ms(10);
   }
 
-  printf("Keep joystick in min x position\n");
+  printf("Keep joystick right\n");
 
   _delay_ms(5000);
 
