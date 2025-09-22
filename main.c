@@ -21,6 +21,8 @@ int main() {
   //sram_test();
 
   analog_init();
+  calib_parameters calibration_values = {0, -1, 0, -1, 0, -1, 0, -1};
+  joystick_calibrate(&calibration_values);
   //  sram_write(6, 15);
   //printf("%d", sram_read(15));
   while (1) {
