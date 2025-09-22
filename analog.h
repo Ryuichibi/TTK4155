@@ -3,29 +3,46 @@
 #include <util/delay.h>
 #include <avr/io.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 typedef struct analog_input{
+  uint8_t analog_ch0;
   uint8_t analog_ch1;
   uint8_t analog_ch2;
   uint8_t analog_ch3;
-  uint8_t analog_ch4;
 }analog_input;
 
 
 void analog_init(void);
 analog_input analog_read();
 
-void joystick_read();
+enum directionX{
+  NEUTRAL,
+  RIGHT,
+  LEFT
+};
+
+enum directionY{
+  NEUTRAL,
+  FORWARD,
+  BACKWARD
+};
+
 typedef struct joystick {
-  uint8_t x_pos;
-  uint8_t y_pos;
-  //bool button;
+  int8_t x_pos;
+  int8_t y_pos;
+  
+  bool button;
+  enum directionY direction_y;
+  enum directionX direction_x;
+
 }joystick;
 
-//enum joystick_direction{
-////  LEFT,
-//  RIGHT,
-//  UP,
-//  DOWN,
-//  NEUTRAL
-//}
+joystick joystick_read();//TODO takes in the wrong inputs compared to the function in .c
+
+typedef struct touchpad {
+  uint8_t x_pos;
+  uint8_t y_pos;
+}touchpad;
+
+touchpad touchpad_read();//TODO takes in the wrong inputs compared to the function in .c
