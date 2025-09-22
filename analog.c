@@ -61,3 +61,99 @@ touchpad touchpad_read(analog_input analog_in){
   out.x_pos = ((xpos - min)*100)/max;
   out.y_pos = ((ypos - min)*100)/max;
 }
+
+void joystick_calibrate(calib_parameters *calib_parameters) {
+
+  printf("Joystick Calibration Started!\n");
+  printf("Keep joystick neutral");
+
+  _delay_ms(2000);
+
+  for (uint8_t i = 0; i < 10; i++) {
+    analog_input data = analog_read();
+
+    if (data.analog_ch0 < calib_parameters->y_neutral_min) 
+    {
+      calib_parameters->y_neutral_min = data.analog_ch0;
+    }
+
+    if (data.analog_ch0 > calib_parameters->y_neutral_max) 
+    {
+      calib_parameters->y_neutral_max = data.analog_ch0;
+    }
+
+    if (data.analog_ch1 < calib_parameters->x_neutral_min) 
+    {
+      calib_parameters->x_neutral_min = data.analog_ch1;
+    }
+
+    if (data.analog_ch1 > calib_parameters->x_neutral_max) 
+    {
+      calib_parameters->x_neutral_max = data.analog_ch1;
+    }
+
+    _delay_ms(10);
+
+  }
+
+  printf("Keep joystick in max y position");
+
+  _delay_ms(2000);
+
+  for (uint8_t i = 0; i < 10; i++) {
+    analog_input data = analog_read();
+
+    if (data.analog_ch0 > calib_parameters->y_max) 
+    {
+      calib_parameters->y_max = data.analog_ch0;
+    }
+
+    _delay_ms(10);
+  }
+
+  printf("Keep joystick in min y position");
+
+  _delay_ms(2000);
+
+  for (uint8_t i = 0; i < 10; i++) {
+    analog_input data = analog_read();
+    
+    if (data.analog_ch0 < calib_parameters->y_min) 
+    {
+      calib_parameters->y_min = data.analog_ch0;
+    }
+
+    _delay_ms(10);
+  }
+
+  printf("Keep joystick in max x position");
+
+  _delay_ms(2000);
+
+  for (uint8_t i = 0; i < 10; i++) {
+    analog_input data = analog_read();
+    
+    if (data.analog_ch1 > calib_parameters->x_max) 
+    {
+      calib_parameters->x_max = data.analog_ch1;
+    }
+
+    _delay_ms(10);
+  }
+
+  printf("Keep joystick in min x position");
+
+  _delay_ms(2000);
+
+  for (uint8_t i = 0; i < 10; i++) {
+    analog_input data = analog_read();
+    
+    if (data.analog_ch1 < calib_parameters->x_min) 
+    {
+      calib_parameters->x_min = data.analog_ch1;
+    }
+
+    _delay_ms(10);
+  }
+  
+}
