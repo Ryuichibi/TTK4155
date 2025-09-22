@@ -1,4 +1,5 @@
 #define F_CPU 4915200
+#define UBRR 31 //using 2400 as baudrate, we get this for the registers according to the formula in the datasheet
 #include <util/delay.h>
 #include <avr/io.h>
 #include <stdio.h>
@@ -23,7 +24,6 @@ int uart_receive_byte (FILE* file){
 }
 
 FILE* uart_init(int baud){
-    int UBRR = 31;
     //setting the baudrate:
     UBRR0H = (UBRR >> 8);
     UBRR0L = UBRR;
