@@ -28,13 +28,13 @@ void analog_init(void);
 analog_input analog_read();
 
 enum directionX{
-  NEUTRAL,
+  NEUTRALX,
   RIGHT,
   LEFT
 };
 
 enum directionY{
-  NEUTRAL,
+  NEUTRALY,
   FORWARD,
   BACKWARD
 };
@@ -50,7 +50,7 @@ typedef struct joystick {
 
 }joystick;
 
-joystick joystick_read();//TODO takes in the wrong inputs compared to the function in .c
+joystick joystick_read(analog_input analog_in, calib_parameters parameters);
 
 typedef struct touchpad {
   uint8_t x_pos;

@@ -22,52 +22,52 @@ analog_input analog_read() {
   return out; // Get the value
 }
 
-joystick joystick_read(analog_input analog_in, bool digital_input, uint8_t max, uint8_t min, uint8_t zero) {
+joystick joystick_read(analog_input analog_in, calib_parameters parameters) {
   joystick pos;
   uint8_t x_pos = analog_in.analog_ch1;
   uint8_t y_pos = analog_in.analog_ch0;
+  uint8_t x_zero = (parameters.x_neutral_max + parameters.x_neutral_min)/2; 
+  uint8_t y_zero = (parameters.y_neutral_max + parameters.y_neutral_min)/2; 
 
-  //TODO needs to be changed according to the calibration struct
-  if (x_pos > zero){
-    pos.x_pos = (x_pos  - zero)*100/(max-zero);
+  if (x_pos > parameters.x_neutral_max){
+    pos.x_pos = (x_pos  - x_zero)*100/(parameters.x_max-x_zero);
     pos.direction_x = RIGHT;
-  } else if (x_pos <  zero) {
-    pos.x_pos = (x_pos - zero)*100/(min-zero);
+  } else if (x_pos < parameters.x_neutral_min) {
+    pos.x_pos = (x_pos - x_zero)*100/(parameters.x_min-x_zero);
     pos.direction_x = LEFT;
   } else {
     pos.x_pos = 0;
-    pos.direction_x = NEUTRAL;
+    pos.direction_x = NEUTRALX;
   }
- //TODO needs to be changed according to calobration struct 
-if ( y_pos > zero){
-    pos.y_pos = (y_pos- zero)*100/(max-zero);
+if ( y_pos > parameters.y_neutral_max){
+    pos.y_pos = (y_pos- y_zero)*100/(parameters.y_max-y_zero);
     pos.direction_y = FORWARD;
-  } else if (y_pos  < zero) {
-    pos.y_pos = (y_pos  - zero)*100/(min-zero);
+  } else if (y_pos  < parameters.y_neutral_min) {
+    pos.y_pos = (y_pos  - y_zero)*100/(parameters.y_min-y_zero);
     pos.direction_y = BACKWARD;
   } else {
     pos.y_pos = 0;
-    pos.direction_y = NEUTRAL;
+    pos.direction_y = NEUTRALY;
   }
 
   return pos;
 }
 
-touchpad touchpad_read(analog_input analog_in){
-  touchpad out;
-  uint8_t xpos = analog_in.analog_ch2; 
-  uint8_t ypos = analog_in.analog_ch3;
+//touchpad touchpad_read(analog_input analog_in){
+//  touchpad out;
+//  uint8_t xpos = analog_in.analog_ch2; 
+//  uint8_t ypos = analog_in.analog_ch3;
 //TODO needs to take in calibration struct, and use it accordingly
-  out.x_pos = ((xpos - min)*100)/max;
-  out.y_pos = ((ypos - min)*100)/max;
-}
+//  out.x_pos = ((xpos - min)*100)/max;
+//  out.y_pos = ((ypos - min)*100)/max;
+//}
 
 void joystick_calibrate(calib_parameters *calib_parameters) {
 
   printf("Joystick Calibration Started!\n");
-  printf("Keep joystick neutral");
+  printf("Keep joystick neutral\n");
 
-  _delay_ms(2000);
+  _delay_ms(5000);
 
   for (uint8_t i = 0; i < 10; i++) {
     analog_input data = analog_read();
@@ -96,9 +96,9 @@ void joystick_calibrate(calib_parameters *calib_parameters) {
 
   }
 
-  printf("Keep joystick in max y position");
+  printf("Keep joystick in max y position\n");
 
-  _delay_ms(2000);
+  _delay_ms(5000);
 
   for (uint8_t i = 0; i < 10; i++) {
     analog_input data = analog_read();
@@ -111,9 +111,9 @@ void joystick_calibrate(calib_parameters *calib_parameters) {
     _delay_ms(10);
   }
 
-  printf("Keep joystick in min y position");
+  printf("Keep joystick in min y position\n");
 
-  _delay_ms(2000);
+  _delay_ms(5000);
 
   for (uint8_t i = 0; i < 10; i++) {
     analog_input data = analog_read();
@@ -126,9 +126,9 @@ void joystick_calibrate(calib_parameters *calib_parameters) {
     _delay_ms(10);
   }
 
-  printf("Keep joystick in max x position");
+  printf("Keep joystick in max x position\n");
 
-  _delay_ms(2000);
+  _delay_ms(5000);
 
   for (uint8_t i = 0; i < 10; i++) {
     analog_input data = analog_read();
@@ -141,9 +141,9 @@ void joystick_calibrate(calib_parameters *calib_parameters) {
     _delay_ms(10);
   }
 
-  printf("Keep joystick in min x position");
+  printf("Keep joystick in min x position\n");
 
-  _delay_ms(2000);
+  _delay_ms(5000);
 
   for (uint8_t i = 0; i < 10; i++) {
     analog_input data = analog_read();
