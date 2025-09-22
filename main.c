@@ -24,14 +24,21 @@ int main() {
   analog_init();
   calib_parameters calibration_values = {0, -1, 0, -1, 0, -1, 0, -1};
   //x_max = left, x_min = right, y_max = down, y_min = up
-  joystick_calibrate(&calibration_values);
+ // joystick_calibrate(&calibration_values);
   printf("y_min: %d, xmin: %d, ymax: %d,x_max %d",calibration_values.y_min, calibration_values.x_min, calibration_values.y_max, calibration_values.x_max);
   //  sram_write(6, 15);
   //printf("%d", sram_read(15));
   while (1) {
     analog_data = analog_read();
     joystick_1 = joystick_read(analog_data, calibration_values);
-    printf("x direction: %d \n y direction: %d", joystick_1.x_pos, joystick_1.y_pos);
+    //printf("%d %d\n", analog_data.analog_ch2, analog_data.analog_ch3);
+    //if (joystick_1.direction_x == RIGHT) printf("Right\n");
+    //if (joystick_1.direction_x == LEFT) printf("Left\n");
+    //if (joystick_1.direction_y == FORWARD) printf("Forward\n");
+    //if (joystick_1.direction_y == BACKWARD) printf("Backward\n");
+    //if (joystick_1.direction_x == NEUTRALX) printf("Neutral_x\n");
+    //if (joystick_1.direction_y == NEUTRALY) printf("Neutral_y\n");
+    //printf("x direction: %d \n y direction: %d", joystick_1.x_pos, joystick_1.y_pos);
   //  printf("y:%d, x:%d\n", analog_data.analog_ch0,analog_data.analog_ch1);
   }
 

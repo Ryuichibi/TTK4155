@@ -31,20 +31,21 @@ joystick joystick_read(analog_input analog_in, calib_parameters parameters) {
 
   if (x_pos > parameters.x_neutral_max){
     pos.x_pos = (x_pos  - x_zero)*100/(parameters.x_max-x_zero);
-    pos.direction_x = RIGHT;
-  } else if (x_pos < parameters.x_neutral_min) {
-    pos.x_pos = (x_pos - x_zero)*100/(parameters.x_min-x_zero);
     pos.direction_x = LEFT;
+  } else if (x_pos < parameters.x_neutral_min) {
+    pos.x_pos = (x_pos - x_zero)*-100/(parameters.x_min-x_zero);
+
+    pos.direction_x = RIGHT;
   } else {
     pos.x_pos = 0;
     pos.direction_x = NEUTRALX;
   }
 if ( y_pos > parameters.y_neutral_max){
     pos.y_pos = (y_pos- y_zero)*100/(parameters.y_max-y_zero);
-    pos.direction_y = FORWARD;
-  } else if (y_pos  < parameters.y_neutral_min) {
-    pos.y_pos = (y_pos  - y_zero)*100/(parameters.y_min-y_zero);
     pos.direction_y = BACKWARD;
+  } else if (y_pos  < parameters.y_neutral_min) {
+    pos.y_pos = (y_pos  - y_zero)*-100/(parameters.y_min-y_zero);
+    pos.direction_y = FORWARD;
   } else {
     pos.y_pos = 0;
     pos.direction_y = NEUTRALY;
@@ -53,14 +54,14 @@ if ( y_pos > parameters.y_neutral_max){
   return pos;
 }
 
-//touchpad touchpad_read(analog_input analog_in){
-//  touchpad out;
-//  uint8_t xpos = analog_in.analog_ch2; 
-//  uint8_t ypos = analog_in.analog_ch3;
+touchpad touchpad_read(analog_input analog_in, calib_parameters paramters){
+  touchpad out;
+  uint8_t xpos = analog_in.analog_ch2; 
+  uint8_t ypos = analog_in.analog_ch3;
 //TODO needs to take in calibration struct, and use it accordingly
-//  out.x_pos = ((xpos - min)*100)/max;
-//  out.y_pos = ((ypos - min)*100)/max;
-//}
+  out.x_pos = ((xpos - 0)*100)/255;
+  out.y_pos = ((ypos - 0)*100)/255;
+}
 
 void joystick_calibrate(calib_parameters *calib_parameters) {
 
@@ -74,22 +75,22 @@ void joystick_calibrate(calib_parameters *calib_parameters) {
 
     if (data.analog_ch0 < calib_parameters->y_neutral_min) 
     {
-      calib_parameters->y_neutral_min = data.analog_ch0;
+      calib_parameters->y_neutral_min = data.analog_ch0 -2;
     }
 
     if (data.analog_ch0 > calib_parameters->y_neutral_max) 
     {
-      calib_parameters->y_neutral_max = data.analog_ch0;
+      calib_parameters->y_neutral_max = data.analog_ch0 +2;
     }
 
     if (data.analog_ch1 < calib_parameters->x_neutral_min) 
     {
-      calib_parameters->x_neutral_min = data.analog_ch1;
+      calib_parameters->x_neutral_min = data.analog_ch1-2;
     }
 
     if (data.analog_ch1 > calib_parameters->x_neutral_max) 
     {
-      calib_parameters->x_neutral_max = data.analog_ch1;
+      calib_parameters->x_neutral_max = data.analog_ch1+2;
     }
 
     _delay_ms(10);
