@@ -5,6 +5,8 @@
 #include "uart.h"
 #include "sram.h"
 #include "analog.h"
+#include "spi.h"
+#include "oled.h"
 
 
 unsigned char data;
@@ -26,9 +28,32 @@ int main() {
   //x_max = left, x_min = right, y_max = down, y_min = up
   //joystick_calibrate(&calibration_values);
   printf("y_min: %d, xmin: %d, ymax: %d,x_max %d",calibration_values.y_min, calibration_values.x_min, calibration_values.y_max, calibration_values.x_max);
+
+  spi_init();
+  oled_init();
+
   while (1) {
-    analog_data = analog_read();
-    joystick_1 = joystick_read(analog_data, calibration_values);
+    //analog_data = analog_read();
+    //joystick_1 = joystick_read(analog_data, calibration_values);
+
+    // oled_write_data(0b01000001);
+    // oled_write_data(0b01111111);
+    // oled_write_data(0b01111111);
+    // oled_write_data(0b01001001);
+    // oled_write_data(0b00011101);
+    // oled_write_data(0b00000001);
+    // oled_write_data(0b00000011);
+    // oled_write_data(0b00000000);
+    oled_write_data(0b11100111);
+    spi_send_char(0xaf, PB4);
+    // spi_send_char(0xa5, PB4);
+    // _delay_ms(2000);
+    // spi_send_char(0xa4, PB4);
+    // _delay_ms(2000);
+
+
+
+
     //printf("%d %d\n", analog_data.analog_ch2, analog_data.analog_ch3);
     //if (joystick_1.direction_x == RIGHT) printf("Right\n");
     //if (joystick_1.direction_x == LEFT) printf("Left\n");
