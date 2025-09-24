@@ -5,8 +5,8 @@
 #include "../lib/uart.h"
 #include "../lib/sram.h"
 #include "../lib/analog.h"
-#include "spi.h"
-#include "oled.h"
+#include "../lib/spi.h"
+#include "../lib/oled.h"
 
 
 unsigned char data;
