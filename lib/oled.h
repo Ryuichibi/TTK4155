@@ -11,10 +11,13 @@
 void oled_init();
 void oled_write_data(char data);
 void oled_write_command(char command);
+void oled_goto_line(uint8_t line);
+void oled_reset();
 
 
 //--------------command defines that are useful------------------
 
+//-----Commands for setup
 #define DISPLAY_OFF 0xAE
 #define SET_SEGMENT_REMAP 0xA0
 #define SET_COM_PINS 0xDA
@@ -36,7 +39,9 @@ void oled_write_command(char command);
 #define SET_DISPLAY_NOT_INVERTED 0xA6
 #define DISPLAY_ON_NORMAL_MODE 0xAF
 
-
-
+//-----Commands for control
+#define SET_PAGE 0xB0
+#define SET_LOWER_COLUMN_START_ADDRESS 0x00
+#define SET_HIGHER_COLUMN_START_ADDRESS 0x10
 
 #endif

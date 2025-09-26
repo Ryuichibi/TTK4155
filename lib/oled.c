@@ -31,20 +31,30 @@ void oled_init()
     oled_write_command(DISPLAY_ON_NORMAL_MODE);
 }
 
-// void oled_reset() //this could be done by just using the pin to control the hardware reset
-// {
-
-// }
+void oled_reset() 
+//this function works, depending on or definition of "reset", it is not the same as using the pin, but this command is called reset
+{
+    oled_write_command(DISPLAY_OFF);
+}
 
 // void oled_home()
 // {
 
 // }
 
-// void oled_goto_line(uint8_t line)
-// {
+void oled_goto_line(uint8_t line)
+{
+    char line_char = SET_PAGE | line;
+    oled_write_command(line_char);
 
-// }
+}
+
+void oled_goto_coloumn(uint8_t column){
+    char lower = (0x0F & column) | SET_LOWER_COLUMN_START_ADDRESS;
+    char higher = (column >> 4) | SET_HIGHER_COLUMN_START_ADDRESS;
+    oled_write_command(lower);
+    oled_write_command(higher);
+}
 
 // void oled_clear_line(uint8_t line)
 // {
