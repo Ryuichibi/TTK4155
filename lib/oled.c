@@ -1,7 +1,7 @@
 #include "oled.h"
 #define SLAVE_SELECT PB4
 #define COMMAND_DATA PB2
-
+#include "../font.h"
 void oled_init()
 {
     // Set D/C as output
@@ -24,15 +24,16 @@ void oled_init()
     oled_write_command(MEMORY_MODE_PAGE);
     oled_write_command(SET_VCOMH_LEVEL);
     oled_write_command(VCOMH_LEVEL);
-    //spi_send_char(0xad, SLAVE_SELECT); //obsolete
-    //spi_send_char(0x00, SLAVE_SELECT); //obsolete
+    // spi_send_char(0xad, SLAVE_SELECT); //obsolete
+    // spi_send_char(0x00, SLAVE_SELECT); //obsolete
     oled_write_command(DISPLAY_RESUME_RAM_CONTENT);
     oled_write_command(SET_DISPLAY_NOT_INVERTED);
     oled_write_command(DISPLAY_ON_NORMAL_MODE);
 }
 
-void oled_reset() 
-//this function works, depending on or definition of "reset", it is not the same as using the pin, but this command is called reset
+void oled_reset()
+// this function works, depending on or definition of "reset", it is not the
+// same as using the pin
 {
     oled_write_command(DISPLAY_OFF);
 }
@@ -46,20 +47,25 @@ void oled_goto_line(uint8_t line)
 {
     char line_char = SET_PAGE | line;
     oled_write_command(line_char);
-
 }
 
-void oled_goto_coloumn(uint8_t column){
+void oled_goto_coloumn(uint8_t column)
+{
     char lower = (0x0F & column) | SET_LOWER_COLUMN_START_ADDRESS;
     char higher = (column >> 4) | SET_HIGHER_COLUMN_START_ADDRESS;
     oled_write_command(lower);
     oled_write_command(higher);
 }
 
-// void oled_clear_line(uint8_t line)
-// {
-
-// }
+void oled_clear_line(uint8_t line)
+{
+    oled_goto_line(line);
+    oled_goto_coloumn(0);
+    for (uint8_t i = 0; i <= 200; i++) {
+        oled_goto_coloumn(i);
+        oled_write_data(0xFF);
+    }
+}
 
 // void oled_position(uint8_t row, uint8_t column)
 // {
@@ -72,22 +78,25 @@ void oled_write_data(char data)
     PORTB |= (1 << COMMAND_DATA);
     spi_send_char(data, SLAVE_SELECT);
     PORTB &= ~(1 << COMMAND_DATA);
-    
 }
 
-void oled_write_command(char command){
+void oled_write_command(char command)
+{
 
     PORTB &= ~(1 << COMMAND_DATA);
     spi_send_char(command, SLAVE_SELECT);
 }
 
-// void oled_print(char *data)
-// {
+void oled_print_letter(char data)
+{
+  for (uint8_t i = 0; i <8; i++){
+    char encoded_data = pgm_read_byte(&font8[(int) data][i]); //probably needs an offset of 20 for the encoding to work properly, but it should print something that looks like a alphanumerical character 
+    oled_write_data(encoded_data);
+  }
+}
 
-// }
-
-// void oled_set_brightness(uint8_t level)
-// {
-
-// }
-
+void oled_set_brightness(uint8_t level)
+{
+    oled_write_command(SET_CONTRAST_CONTROL);
+    oled_write_command((char)level);
+}
