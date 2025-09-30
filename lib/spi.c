@@ -1,4 +1,6 @@
 #include "spi.h"
+#include <avr/io.h>
+#include <stdint.h>
 
 void spi_init()
 {
@@ -6,47 +8,61 @@ void spi_init()
     DDRB |= (1 << PB5) | (1 << PB7) | (1 << PB4);
 
     // Set MISO as input
-    DDRB &= ~(1<<PB6);
+    DDRB &= ~(1 << PB6);
 
     // Set up SS signals
-    DDRB |= (1<<PB4) | (1<<PB3);
-    PORTB |= (1<<PB4) | (1<<PB3);
+    DDRB |= (1 << PB4) | (1 << PB3);
+    PORTB |= (1 << PB4) | (1 << PB3);
 
     // Enable SPI, Set as Master, SCK = f_osc / 16
     SPCR = (1 << SPE) | (1 << MSTR) | (1 << SPR0);
 
-    SPSR &= ~(1<<SPI2X);
-
+    SPSR &= ~(1 << SPI2X);
 }
 
-void spi_send(char data)
+void spi_send_receive(char data, char *out)
 {
 
     // Put data into shift register
     SPDR = data;
 
     // Wait for data transmit to complete
-    while (!(SPSR & (1<<SPIF)));
-
+    while (!(SPSR & (1 << SPIF)))
+        ;
+    *out = SPDR;
 }
 
+// do we actually need the following function?
 void spi_send_string(char *data, uint8_t size, uint8_t ss_port)
 {
     PORTB &= ~(1 << ss_port);
+    char *flush_buffer;
 
-    for (uint8_t i = 0; i < size; i++)
-    {
-        spi_send(data[i]);
+    for (uint8_t i = 0; i < size; i++) {
+        spi_send_receive(data[i], flush_buffer);
     }
 
     PORTB |= (1 << ss_port);
-
 }
 
 void spi_send_char(char data, uint8_t ss_port)
 {
-    PORTB &= ~(1 << ss_port);
-    spi_send(data);
-    PORTB |= (1 << ss_port);
-
+    //TODO change all uses of this function, and wrap them in open and close 
+    char *flush_buffer;
+    spi_send_receive(data, flush_buffer);
 }
+
+void spi_receive_char(char *data, uint8_t ss_port)
+{
+    spi_send_receive(0x00, data);
+}
+
+void spi_open_com(uint8_t ss_port){
+    PORTB &= ~(1 << ss_port);
+}
+
+void spi_close_com(uint8_t ss_port){
+    PORTB |= (1 << ss_port);
+}
+
+

@@ -1,3 +1,5 @@
+#ifndef ANALOG_H_
+#define ANALOG_H_
 #include <stdint.h>
 #define F_CPU 4915200
 #include <util/delay.h>
@@ -55,6 +57,8 @@ joystick joystick_read(analog_input analog_in, calib_parameters parameters);
 typedef struct touchpad {
   uint8_t x_pos;
   uint8_t y_pos;
+  uint8_t size;
 }touchpad;
 
 touchpad touchpad_read();//TODO takes in the wrong inputs compared to the function in .c
+#endif
