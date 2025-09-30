@@ -27,8 +27,13 @@ void oled_init()
     // spi_send_char(0xad, SLAVE_SELECT); //obsolete
     // spi_send_char(0x00, SLAVE_SELECT); //obsolete
     oled_write_command(DISPLAY_RESUME_RAM_CONTENT);
-    oled_write_command(SET_DISPLAY_NOT_INVERTED);
+    //oled_write_command(SET_DISPLAY_NOT_INVERTED);
+    oled_write_command(SET_DISPLAY_INVERTED);
     oled_write_command(DISPLAY_ON_NORMAL_MODE);
+
+
+
+    oled_reset();
 }
 
 void oled_reset()
@@ -40,13 +45,6 @@ void oled_reset()
 
     //TODO: Do more?
 }
-
-// void oled_home()
-// {
-
-// }
-
-
 
 
 void oled_position(uint8_t row, uint8_t column)
@@ -75,8 +73,7 @@ void oled_clear_row(uint8_t row)
     oled_goto_row(row);
     oled_goto_column(0);
     for (uint8_t i = 0; i <= 127; i++) {
-        oled_goto_column(i);
-        oled_write_data(0xFF);
+        oled_write_data(0x00);
         // TODO this is wrong, and is here only for testing
     }
 }
@@ -98,13 +95,24 @@ void oled_write_command(char command)
 void oled_print_letter(char data)
 {
     for (uint8_t i = 0; i < 8; i++) {
-        char encoded_data = pgm_read_byte(&font8[(
-            int)data][i]); // probably needs an offset of 20 for the encoding
+        char encoded_data = pgm_read_byte(&font8[(uint8_t)data - 0x20][i]); // probably needs an offset of 20 for the encoding
                            // to work properly, but it should print something
                            // that looks like an alphanumerical character
-        oled_write_data(encoded_data);
+        spi_send_char(encoded_data, SLAVE_SELECT);
     }
  }
+
+void oled_print(char *data, uint8_t size)
+{
+    PORTB |= (1 << COMMAND_DATA);
+
+    for (uint8_t i = 0; i < size; i++)
+    {
+        oled_print_letter(data[i]);
+    }
+
+    PORTB &= ~(1 << COMMAND_DATA);
+}
 
 
 

@@ -18,6 +18,7 @@ void oled_goto_column(uint8_t column);
 void oled_reset();
 void oled_clear_row(uint8_t row);
 void oled_print_letter(char data);
+void oled_print(char *data, uint8_t size);
 
 
 //--------------command defines that are useful------------------
@@ -42,6 +43,7 @@ void oled_print_letter(char data);
 #define VCOMH_LEVEL 0x30
 #define DISPLAY_RESUME_RAM_CONTENT 0xA4
 #define SET_DISPLAY_NOT_INVERTED 0xA6
+#define SET_DISPLAY_INVERTED 0xa7
 #define DISPLAY_ON_NORMAL_MODE 0xAF
 
 //-----Commands for control

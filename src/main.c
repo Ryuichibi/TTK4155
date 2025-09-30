@@ -7,11 +7,18 @@
 #include <avr/io.h>
 #include <stdio.h>
 #include <util/delay.h>
+#include <string.h>
 
 unsigned char data;
 FILE *UART;
 joystick joystick_1;
 analog_input analog_data;
+
+struct menu {
+  char **data;
+  uint8_t elements;
+  uint8_t selected;
+};
 
 int main()
 {
@@ -32,13 +39,31 @@ int main()
     spi_init();
     oled_init();
 
-    spi_init();
-    oled_init();
-    oled_goto_row(0x02);
-    oled_goto_column(0x40);
+    struct menu main_menu;
+    main_menu.data = malloc(sizeof(char*) * 8);
+    main_menu.elements = 8;
+    main_menu.selected = 0;
+    main_menu.data[0] = "New game";
+    
+    //char main_menu[8][16] = {"New game", "Scoreboard", "Reset", "Calib Joystick", "Difficulty", "", "Debug", ""};
+    for (uint8_t i = 0; i < main_menu.elements; i++)
+    {
+      oled_goto_row(0x00 | i);
+      oled_goto_column(0x08);
+      oled_print(main_menu.data[i], strlen(main_menu.data[i]));
+    }
+
+    // oled_goto_row(0x02);
+    // oled_goto_column(0x00);
+    // oled_print("Reset high score", 16);
+    // oled_goto_row(0x03);
+    // oled_goto_column(0x00);
+    // oled_print("   Test2", 7);
+    oled_goto_row(0x00);
+    oled_goto_column(0x00);
 
     while (1) {
-        oled_write_data(0xff);
+        //oled_write_data(0xff);
         spi_send_char(0xaf, PB4);
     }
     return 0;
