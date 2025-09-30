@@ -87,7 +87,7 @@ void oled_write_data(char data)
 {
     PORTB |= (1 << COMMAND_DATA);
     spi_open_com(SLAVE_SELECT);
-    spi_send_char(data, SLAVE_SELECT);
+    spi_send_char(data);
     spi_close_com(SLAVE_SELECT);
     PORTB &= ~(1 << COMMAND_DATA);
 }
@@ -96,7 +96,7 @@ void oled_write_command(char command)
 {
     PORTB &= ~(1 << COMMAND_DATA);
     spi_open_com(SLAVE_SELECT);
-    spi_send_char(command, SLAVE_SELECT);
+    spi_send_char(command);
     spi_close_com(SLAVE_SELECT);
 }
 
