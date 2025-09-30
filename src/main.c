@@ -31,6 +31,8 @@ int main() {
 
   spi_init();
   oled_init();
+  oled_goto_row(0x02);
+  oled_goto_column(0x40);
 
   while (1) {
     //analog_data = analog_read();
@@ -44,8 +46,10 @@ int main() {
     // oled_write_data(0b00000001);
     // oled_write_data(0b00000011);
     // oled_write_data(0b00000000);
-    oled_write_data(0b11100111);
+
+    oled_write_data(0xff);
     spi_send_char(0xaf, PB4);
+
     // spi_send_char(0xa5, PB4);
     // _delay_ms(2000);
     // spi_send_char(0xa4, PB4);
