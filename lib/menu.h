@@ -1,12 +1,15 @@
 #ifndef MENU_H
 #define MENU_H
 
-typedef struct menu {
-    char **data;
-    uint8_t size;
-    uint8_t elements;
+typedef struct menu menu;
+
+struct menu {
+    char *value;
+    menu **sub_menus;
+    uint8_t n_entries;
     uint8_t selected;
-} menu;
+    menu *parent_menu;
+};
 
 
 #endif

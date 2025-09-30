@@ -15,15 +15,16 @@ FILE *UART;
 joystick joystick_1;
 analog_input analog_data;
 
-void print_main_menu(menu main_menu)
+void print_menu(menu *menu)
 {
-  for (uint8_t i = 0; i < main_menu.elements; i++)
-    {
-      oled_goto_row(0x00 | i);
-      oled_goto_column(0x09);
-      oled_print(main_menu.data[i], strlen(main_menu.data[i]));
-    }
-    oled_arrow(main_menu.selected);
+  for (uint8_t i = 0; i < menu->n_entries; i++)
+  {
+    oled_goto_row(0x00 | i);
+    oled_goto_column(0x09);
+    oled_print(menu->sub_menus[i]->value, strlen(menu->sub_menus[i]->value));
+  }
+  oled_arrow(menu->selected);
+  
 }
 
 int main()
@@ -45,39 +46,67 @@ int main()
     spi_init();
     oled_init();
 
-    menu main_menu;
-    main_menu.data = malloc(sizeof(char*) * 8);
-    main_menu.size = 8;
-    main_menu.elements = 3;
-    main_menu.selected = 1;
-    main_menu.data[0] = "New game";
-    main_menu.data[1] = "Scoreboard";
-    main_menu.data[2] = "Cali Joystick";
+    menu *main_menu = malloc(sizeof(menu));
+    main_menu->sub_menus = malloc(sizeof(menu*) * 3);
+    main_menu->n_entries = 3;
+    main_menu->selected = 0;
+    main_menu->sub_menus[0] = malloc(sizeof(menu));
+    main_menu->sub_menus[1] = malloc(sizeof(menu));
+    main_menu->sub_menus[2] = malloc(sizeof(menu));
+    main_menu->sub_menus[0]->value = "New game";
+    main_menu->sub_menus[1]->value = "Scoreboard";
+    main_menu->sub_menus[2]->value = "Cali Joystick";
+    main_menu->sub_menus[1]->parent_menu = main_menu;
+    main_menu->sub_menus[1]->sub_menus = malloc(sizeof(menu*) * 2);
+    main_menu->sub_menus[1]->n_entries = 2;
+    main_menu->sub_menus[1]->selected = 0;
+    main_menu->sub_menus[1]->sub_menus[0] = malloc(sizeof(menu));
+    main_menu->sub_menus[1]->sub_menus[1] = malloc(sizeof(menu));
+    main_menu->sub_menus[1]->sub_menus[0]->value = "Test1";
+    main_menu->sub_menus[1]->sub_menus[1]->value = "Test2";
 
-    print_main_menu(main_menu);
 
-    DDRB &= ~(1 << PB0);
+    // Setup joystick button
+    DDRB &= ~(1 << PB0);  
     PORTA &= ~(1 << PA0);
 
+    menu *current_menu = main_menu;
+
+    print_menu(current_menu);
 
     while (1) {
         joystick_1 = joystick_read(analog_read(), calibration_values);
         
+
+        // Move along menu entries
         if (joystick_1.direction_y == 1) 
         {
-          oled_arrow_reset(main_menu.selected);
-          main_menu.selected = (main_menu.selected == 0) ? main_menu.elements - 1 : main_menu.selected - 1;
+          oled_arrow_reset(current_menu->selected);
+          current_menu->selected = (current_menu->selected == 0) ? current_menu->n_entries - 1 : current_menu->selected - 1;
+          oled_arrow(current_menu->selected);
         }
         else if (joystick_1.direction_y == 2) 
         {
-          oled_arrow_reset(main_menu.selected);
-          main_menu.selected = (main_menu.selected == main_menu.elements - 1) ? 0 : main_menu.selected + 1;
+          oled_arrow_reset(current_menu->selected);
+          current_menu->selected = (current_menu->selected == current_menu->n_entries - 1) ? 0 : current_menu->selected + 1;
+          oled_arrow(current_menu->selected);
         }
-        oled_arrow(main_menu.selected);
 
+        if (!(PINB & (1 << PB0)) && current_menu->sub_menus) {
+          printf("%s\n", current_menu->sub_menus[current_menu->selected]->value);
+        }
 
-        if (!(PINB & (1 << PB0))) {
-          printf("%s\n", main_menu.data[main_menu.selected]);
+        if (joystick_1.direction_x == 1 && current_menu->sub_menus[current_menu->selected]->sub_menus)
+        {
+          current_menu = current_menu->sub_menus[current_menu->selected];
+          oled_reset();
+          print_menu(current_menu);
+        }
+        else if (joystick_1.direction_x == 2 && current_menu->parent_menu)
+        {
+          current_menu = current_menu->parent_menu;
+          oled_reset();
+          print_menu(current_menu);
         }
 
         
