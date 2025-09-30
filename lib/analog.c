@@ -75,22 +75,22 @@ void joystick_calibrate(calib_parameters *calib_parameters) {
 
     if (data.analog_ch0 < calib_parameters->y_neutral_min) 
     {
-      calib_parameters->y_neutral_min = data.analog_ch0 -2;
+      calib_parameters->y_neutral_min = data.analog_ch0 -8;
     }
 
     if (data.analog_ch0 > calib_parameters->y_neutral_max) 
     {
-      calib_parameters->y_neutral_max = data.analog_ch0 +2;
+      calib_parameters->y_neutral_max = data.analog_ch0 +8;
     }
 
     if (data.analog_ch1 < calib_parameters->x_neutral_min) 
     {
-      calib_parameters->x_neutral_min = data.analog_ch1-2;
+      calib_parameters->x_neutral_min = data.analog_ch1-8;
     }
 
     if (data.analog_ch1 > calib_parameters->x_neutral_max) 
     {
-      calib_parameters->x_neutral_max = data.analog_ch1+2;
+      calib_parameters->x_neutral_max = data.analog_ch1+8;
     }
 
     _delay_ms(10);

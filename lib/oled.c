@@ -114,6 +114,26 @@ void oled_print(char *data, uint8_t size)
     PORTB &= ~(1 << COMMAND_DATA);
 }
 
+void oled_arrow(uint8_t row)
+{
+    oled_position(row,2);
+    oled_write_data (0b00011000);
+    oled_write_data (0b00011000);
+    oled_write_data (0b01111110);
+    oled_write_data (0b00111100);
+    oled_write_data (0b00011000);
+}
+
+void oled_arrow_reset(uint8_t row)
+{
+    oled_position(row,2);
+    oled_write_data (0x00);
+    oled_write_data (0x00);
+    oled_write_data (0x00);
+    oled_write_data (0x00);
+    oled_write_data (0x00);
+}
+
 
 
 void oled_set_brightness(uint8_t level)

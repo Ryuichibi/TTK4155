@@ -19,6 +19,8 @@ void oled_reset();
 void oled_clear_row(uint8_t row);
 void oled_print_letter(char data);
 void oled_print(char *data, uint8_t size);
+void oled_arrow(uint8_t row);
+void oled_arrow_reset(uint8_t row);
 
 
 //--------------command defines that are useful------------------

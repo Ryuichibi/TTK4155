@@ -4,6 +4,7 @@
 #include "../lib/spi.h"
 #include "../lib/sram.h"
 #include "../lib/uart.h"
+#include "../lib/menu.h"
 #include <avr/io.h>
 #include <stdio.h>
 #include <util/delay.h>
@@ -14,11 +15,16 @@ FILE *UART;
 joystick joystick_1;
 analog_input analog_data;
 
-struct menu {
-  char **data;
-  uint8_t elements;
-  uint8_t selected;
-};
+void print_main_menu(menu main_menu)
+{
+  for (uint8_t i = 0; i < main_menu.elements; i++)
+    {
+      oled_goto_row(0x00 | i);
+      oled_goto_column(0x09);
+      oled_print(main_menu.data[i], strlen(main_menu.data[i]));
+    }
+    oled_arrow(main_menu.selected);
+}
 
 int main()
 {
@@ -31,7 +37,7 @@ int main()
     analog_init();
     calib_parameters calibration_values = {0, -1, 0, -1, 0, -1, 0, -1};
     // x_max = left, x_min = right, y_max = down, y_min = up
-    // joystick_calibrate(&calibration_values);
+    joystick_calibrate(&calibration_values);
     printf("y_min: %d, xmin: %d, ymax: %d,x_max %d", calibration_values.y_min,
            calibration_values.x_min, calibration_values.y_max,
            calibration_values.x_max);
@@ -39,32 +45,44 @@ int main()
     spi_init();
     oled_init();
 
-    struct menu main_menu;
+    menu main_menu;
     main_menu.data = malloc(sizeof(char*) * 8);
-    main_menu.elements = 8;
-    main_menu.selected = 0;
+    main_menu.size = 8;
+    main_menu.elements = 3;
+    main_menu.selected = 1;
     main_menu.data[0] = "New game";
-    
-    //char main_menu[8][16] = {"New game", "Scoreboard", "Reset", "Calib Joystick", "Difficulty", "", "Debug", ""};
-    for (uint8_t i = 0; i < main_menu.elements; i++)
-    {
-      oled_goto_row(0x00 | i);
-      oled_goto_column(0x08);
-      oled_print(main_menu.data[i], strlen(main_menu.data[i]));
-    }
+    main_menu.data[1] = "Scoreboard";
+    main_menu.data[2] = "Cali Joystick";
 
-    // oled_goto_row(0x02);
-    // oled_goto_column(0x00);
-    // oled_print("Reset high score", 16);
-    // oled_goto_row(0x03);
-    // oled_goto_column(0x00);
-    // oled_print("   Test2", 7);
-    oled_goto_row(0x00);
-    oled_goto_column(0x00);
+    print_main_menu(main_menu);
+
+    DDRB &= ~(1 << PB0);
+    PORTA &= ~(1 << PA0);
+
 
     while (1) {
-        //oled_write_data(0xff);
-        spi_send_char(0xaf, PB4);
+        joystick_1 = joystick_read(analog_read(), calibration_values);
+        
+        if (joystick_1.direction_y == 1) 
+        {
+          oled_arrow_reset(main_menu.selected);
+          main_menu.selected = (main_menu.selected == 0) ? main_menu.elements - 1 : main_menu.selected - 1;
+        }
+        else if (joystick_1.direction_y == 2) 
+        {
+          oled_arrow_reset(main_menu.selected);
+          main_menu.selected = (main_menu.selected == main_menu.elements - 1) ? 0 : main_menu.selected + 1;
+        }
+        oled_arrow(main_menu.selected);
+
+
+        if (!(PINB & (1 << PB0))) {
+          printf("%s\n", main_menu.data[main_menu.selected]);
+        }
+
+        
+        _delay_ms(150);
+        //spi_send_char(0xaf, PB4);
     }
     return 0;
 }
