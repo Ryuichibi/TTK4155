@@ -61,7 +61,7 @@ void oled_clear_line(uint8_t line)
 {
     oled_goto_line(line);
     oled_goto_coloumn(0);
-    for (uint8_t i = 0; i <= 200; i++) {
+    for (uint8_t i = 0; i <= 127; i++) {
         oled_goto_coloumn(i);
         oled_write_data(0xFF);
         // TODO this is wrong, and is here only for testing
@@ -90,9 +90,9 @@ void oled_print_letter(char data)
 {
     for (uint8_t i = 0; i < 8; i++) {
         char encoded_data = pgm_read_byte(&font8[(
-            int)data][i]); // probably needs an offset of 20 for the encoding to
-                           // work properly, but it should print something that
-                           // looks like an alphanumerical character
+            int)data][i]); // probably needs an offset of 20 for the encoding
+                           // to work properly, but it should print something
+                           // that looks like an alphanumerical character
         oled_write_data(encoded_data);
     }
 }
