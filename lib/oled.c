@@ -32,10 +32,12 @@ void oled_init()
 }
 
 void oled_reset()
-// this function works, depending on or definition of "reset", it is not the
-// same as using the pin
 {
-    oled_write_command(DISPLAY_OFF);
+    for (uint8_t i = 0; i < 8; i++) {
+        oled_clear_row(i);
+    }
+
+    // TODO: Do more?
 }
 
 // void oled_home()
@@ -43,13 +45,13 @@ void oled_reset()
 
 // }
 
-void oled_goto_line(uint8_t line)
+void oled_goto_row(uint8_t row)
 {
-    char line_char = SET_PAGE | line;
-    oled_write_command(line_char);
+    char row_char = SET_PAGE | row;
+    oled_write_command(row_char);
 }
 
-void oled_goto_coloumn(uint8_t column)
+void oled_goto_column(uint8_t column)
 {
     char lower = (0x0F & column) | SET_LOWER_COLUMN_START_ADDRESS;
     char higher = (column >> 4) | SET_HIGHER_COLUMN_START_ADDRESS;
@@ -57,21 +59,24 @@ void oled_goto_coloumn(uint8_t column)
     oled_write_command(higher);
 }
 
-void oled_clear_line(uint8_t line)
+void oled_clear_row(uint8_t row)
 {
-    oled_goto_line(line);
-    oled_goto_coloumn(0);
+    oled_goto_row(row);
+    oled_goto_column(0);
     for (uint8_t i = 0; i <= 127; i++) {
-        oled_goto_coloumn(i);
+        oled_goto_column(i);
         oled_write_data(0xFF);
         // TODO this is wrong, and is here only for testing
     }
 }
 
-// void oled_position(uint8_t row, uint8_t column)
-// {
 
-// }
+
+void oled_position(uint8_t row, uint8_t column)
+{
+    oled_goto_row(row);
+    oled_goto_column(column);
+}
 
 void oled_write_data(volatile char data)
 {

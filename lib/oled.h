@@ -8,15 +8,17 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <util/delay.h>
+#include "font.h"
 
 void oled_init();
 void oled_write_data(char data);
 void oled_write_command(char command);
-void oled_goto_line(uint8_t line);
-void oled_goto_coloumn(uint8_t column);
+void oled_goto_row(uint8_t row);
+void oled_goto_column(uint8_t column);
 void oled_reset();
-void oled_clear_line(uint8_t line);
+void oled_clear_row(uint8_t row);
 void oled_print_letter(char data);
+
 
 //--------------command defines that are useful------------------
 
