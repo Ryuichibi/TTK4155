@@ -45,14 +45,13 @@ void spi_send_string(char *data, uint8_t size, uint8_t ss_port)
     PORTB |= (1 << ss_port);
 }
 
-void spi_send_char(char data, uint8_t ss_port)
+void spi_send_char(char data)
 {
-    //TODO change all uses of this function, and wrap them in open and close 
     char *flush_buffer;
     spi_send_receive(data, flush_buffer);
 }
 
-void spi_receive_char(char *data, uint8_t ss_port)
+void spi_receive_char(char *data)
 {
     spi_send_receive(0x00, data);
 }

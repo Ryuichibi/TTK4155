@@ -19,22 +19,16 @@ analog_input analog_data;
 
 int main()
 {
-
     UART = uart_init(9600);
     sram_init();
-    // sram_test();
-
-    // x_max = left, x_min = right, y_max = down, y_min = up
-    // joystick_calibrate(&calibration_values);
-
     spi_init();
-    oled_init();
 
-    oled_goto_row(0x02);
-    oled_goto_column(0x40);
-
-    char *flush;
     while (1) {
+        read_touchpad(&touchpad_1);
+        printf("%d\t", touchpad_1.x_pos);
+        printf("%d\t", touchpad_1.y_pos);
+        printf("%d\n", touchpad_1.size);
+        _delay_ms(500);
     }
     return 0;
 }
