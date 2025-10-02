@@ -19,5 +19,7 @@ void framebuffer_goto_line(uint8_t line);
 void framebuffer_goto_column(uint8_t column);
 void framebuffer_print_letter(char data);
 void framebuffer_print_string(const char *str);
+void framebuffer_arrow(uint8_t row);
+void framebuffer_arrow_reset(uint8_t row);
 
 #endif

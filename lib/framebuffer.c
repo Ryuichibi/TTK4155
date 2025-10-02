@@ -5,7 +5,7 @@ Cursor cursor = {0,0};
 void framebuffer_init(){
     for (int page = 0; page < PAGES; page++){
         for (int column = 0; column < COLUMNS; column++){
-            sram_write(0xFF, page * COLUMNS + column);
+            sram_write(0x00, page * COLUMNS + column);
         }
     }
 }
@@ -42,4 +42,25 @@ void framebuffer_print_string(const char *str)
         framebuffer_print_letter(*str);  // print current letter
         str++;                        // move to next character
     }
+}
+
+
+void framebuffer_arrow(uint8_t row)
+{
+    framebuffer_goto_line(row);
+    framebuffer_goto_column(2);
+    sram_write(0b00011000, cursor.page * COLUMNS + cursor.column++); 
+    sram_write(0b01111110, cursor.page * COLUMNS + cursor.column++);
+    sram_write(0b00111100, cursor.page * COLUMNS + cursor.column++);
+    sram_write(0b00011000, cursor.page * COLUMNS + cursor.column++);
+}
+
+void framebuffer_arrow_reset(uint8_t row)
+{
+    framebuffer_goto_line(row);
+    framebuffer_goto_column(2);
+    sram_write(0x00, cursor.page * COLUMNS + cursor.column++);
+    sram_write(0x00, cursor.page * COLUMNS + cursor.column++);
+    sram_write(0x00, cursor.page * COLUMNS + cursor.column++);
+    sram_write(0x00, cursor.page * COLUMNS + cursor.column++);
 }

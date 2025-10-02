@@ -28,30 +28,29 @@ int main()
     // sram_test();
 
     analog_init();
-    //calib_parameters calibration_values = {0, -1, 0, -1, 0, -1, 0, -1};
+    calib_parameters calibration_values = {0, -1, 0, -1, 0, -1, 0, -1};
     // x_max = left, x_min = right, y_max = down, y_min = up
-    //joystick_calibrate(&calibration_values);
-    //printf("y_min: %d, xmin: %d, ymax: %d,x_max %d", calibration_values.y_min,
-    //       calibration_values.x_min, calibration_values.y_max,
-    //       calibration_values.x_max);
+    joystick_calibrate(&calibration_values);
+    printf("y_min: %d, xmin: %d, ymax: %d,x_max %d", calibration_values.y_min,
+            calibration_values.x_min, calibration_values.y_max,
+            calibration_values.x_max);
 
     spi_init();
     oled_init();
 
     // Setup joystick button
-    DDRB &= ~(1 << PB0);  
+    DDRB &= ~(1 << PB0);    
     PORTA &= ~(1 << PA0);
-
-    //menu *main_menu = menu_init();
-    //menu *current_menu = main_menu;
-    //print_menu(current_menu);
+    
+    framebuffer_init();
+    menu *main_menu = menu_init();
+    menu *current_menu = main_menu;
+    print_menu(current_menu);
 
     while (1) {
-      //joystick_1 = joystick_read(analog_read(), calibration_values);
+      joystick_1 = joystick_read(analog_read(), calibration_values);
 
-      // current_menu = menu_handle_input(current_menu, joystick_1);
-
-      framebuffer_init();
+      current_menu = menu_handle_input(current_menu, joystick_1);
       oled_update_display();
         
         _delay_ms(200);

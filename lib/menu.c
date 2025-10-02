@@ -29,11 +29,14 @@ void print_menu(menu *menu)
 {
   for (uint8_t i = 0; i < menu->n_entries; i++)
   {
-    oled_goto_row(0x00 | i);
-    oled_goto_column(0x09);
-    oled_print(menu->sub_menus[i]->value, strlen(menu->sub_menus[i]->value));
+    framebuffer_goto_line(i);
+    framebuffer_goto_column(0x09);
+    framebuffer_print_string(menu->sub_menus[i]->value);
+    
+    
+    //oled_print(menu->sub_menus[i]->value, strlen(menu->sub_menus[i]->value));
   }
-  oled_arrow(menu->selected);
+    framebuffer_arrow(menu->selected);
   
 }
 
@@ -42,15 +45,15 @@ menu* menu_handle_input(menu *current_menu, joystick joystick_1)
         // Move along menu entries
         if (joystick_1.direction_y == 1) 
         {
-          oled_arrow_reset(current_menu->selected);
+          framebuffer_arrow_reset(current_menu->selected);
           current_menu->selected = (current_menu->selected == 0) ? current_menu->n_entries - 1 : current_menu->selected - 1;
-          oled_arrow(current_menu->selected);
+          framebuffer_arrow(current_menu->selected);
         }
         else if (joystick_1.direction_y == 2) 
         {
-          oled_arrow_reset(current_menu->selected);
+          framebuffer_arrow_reset(current_menu->selected);
           current_menu->selected = (current_menu->selected == current_menu->n_entries - 1) ? 0 : current_menu->selected + 1;
-          oled_arrow(current_menu->selected);
+          framebuffer_arrow(current_menu->selected);
         }
 
         if (!(PINB & (1 << PB0)) && current_menu->sub_menus) {
@@ -59,15 +62,15 @@ menu* menu_handle_input(menu *current_menu, joystick joystick_1)
 
         if (joystick_1.direction_x == 1 && current_menu->sub_menus[current_menu->selected]->sub_menus)
         {
-          current_menu = current_menu->sub_menus[current_menu->selected];
-          oled_reset();
-          print_menu(current_menu);
+          //current_menu = current_menu->sub_menus[current_menu->selected];
+          //oled_reset();
+          //print_menu(current_menu);
         }
         else if (joystick_1.direction_x == 2 && current_menu->parent_menu)
         {
-          current_menu = current_menu->parent_menu;
-          oled_reset();
-          print_menu(current_menu);
+          //current_menu = current_menu->parent_menu;
+          //oled_reset();
+          //print_menu(current_menu);
         }
 
     return current_menu;

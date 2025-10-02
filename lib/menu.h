@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include "oled.h"
+#include "framebuffer.h"
 #include "analog.h"
 
 typedef struct menu menu;
