@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <util/delay.h>
 #include "font.h"
+#include "framebuffer.h"
 
 void oled_init();
 void oled_write_data(char data);
@@ -21,6 +22,7 @@ void oled_print_letter(char data);
 void oled_print(char *data, uint8_t size);
 void oled_arrow(uint8_t row);
 void oled_arrow_reset(uint8_t row);
+void oled_update_display();
 
 
 //--------------command defines that are useful------------------
@@ -41,6 +43,7 @@ void oled_arrow_reset(uint8_t row);
 #define PRECHARGE_PERIOD 0x21
 #define SET_MEMORY_ADDRESSING_MODE 0x20
 #define MEMORY_MODE_PAGE 0x02
+#define HORIZONTAL_ADDRESSING_MODE 0x00
 #define SET_VCOMH_LEVEL 0xDB
 #define VCOMH_LEVEL 0x30
 #define DISPLAY_RESUME_RAM_CONTENT 0xA4

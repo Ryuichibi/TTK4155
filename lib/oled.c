@@ -21,14 +21,14 @@ void oled_init()
     oled_write_command(SET_PRECHARGE_PERIOD);
     oled_write_command(PRECHARGE_PERIOD);
     oled_write_command(SET_MEMORY_ADDRESSING_MODE);
-    oled_write_command(MEMORY_MODE_PAGE);
+    oled_write_command(HORIZONTAL_ADDRESSING_MODE);
     oled_write_command(SET_VCOMH_LEVEL);
     oled_write_command(VCOMH_LEVEL);
     // spi_send_char(0xad, SLAVE_SELECT); //obsolete
     // spi_send_char(0x00, SLAVE_SELECT); //obsolete
     oled_write_command(DISPLAY_RESUME_RAM_CONTENT);
-    //oled_write_command(SET_DISPLAY_NOT_INVERTED);
-    oled_write_command(SET_DISPLAY_INVERTED);
+    oled_write_command(SET_DISPLAY_NOT_INVERTED);
+    //oled_write_command(SET_DISPLAY_INVERTED);
     oled_write_command(DISPLAY_ON_NORMAL_MODE);
 
 
@@ -140,4 +140,15 @@ void oled_set_brightness(uint8_t level)
 {
     oled_write_command(SET_CONTRAST_CONTROL);
     oled_write_command((char)level);
+}
+
+void oled_update_display(){  // This function writes the entire framebuffer (SRAM) to the display
+    oled_position(0,0);
+    PORTB |= (1 << COMMAND_DATA);
+
+    for (uint16_t addr = 0; addr < PAGES*COLUMNS ; addr++){
+        spi_send_char(sram_read(addr), SLAVE_SELECT);
+    }
+
+    PORTB &= ~(1 << COMMAND_DATA);
 }
