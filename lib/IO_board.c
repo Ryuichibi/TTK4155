@@ -8,16 +8,9 @@ void read_touchpad(touchpad *touchpad)
     spi_open_com(SSIO_board);
     spi_send_char(0x01);
     _delay_us(40);
-#ifndef USE_ADC
-    spi_receive_char(&(touchpad->x_pos)); // read x position of toucpad
-    _delay_us(5);
-    spi_receive_char(&touchpad->y_pos); // read y position of toucpad
-#else
     spi_receive_char(flushBuffer); // read x position of toucpad
-    _delay_us(2);
+    _delay_us(5);
     spi_receive_char(flushBuffer); // read y position of toucpad
-#endif
-
     _delay_us(2);
     spi_receive_char(&(touchpad->size)); // read size of touchpad area
     spi_close_com(SSIO_board);
