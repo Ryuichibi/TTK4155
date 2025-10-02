@@ -1,3 +1,6 @@
+#ifndef ANALOG_H
+#define ANALOG_H
+
 #include <stdint.h>
 #define F_CPU 4915200
 #include <util/delay.h>
@@ -58,3 +61,5 @@ typedef struct touchpad {
 }touchpad;
 
 touchpad touchpad_read();//TODO takes in the wrong inputs compared to the function in .c
+
+#endif
