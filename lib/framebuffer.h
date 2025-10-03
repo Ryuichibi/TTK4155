@@ -14,12 +14,17 @@ typedef struct {
     uint8_t column;
 } Cursor;
 
-void framebuffer_init();
-void framebuffer_goto_line(uint8_t line);
-void framebuffer_goto_column(uint8_t column);
-void framebuffer_print_letter(char data);
-void framebuffer_print_string(const char *str);
-void framebuffer_arrow(uint8_t row);
-void framebuffer_arrow_reset(uint8_t row);
 
+// The commands for writing to the framebuffer has been made to ressemble the oled commands
+
+void framebuffer_oled_init();
+//void framebuffer_oled_write_data(char data); No use for it yet
+void framebuffer_oled_goto_row(uint8_t row);
+void framebuffer_oled_goto_column(uint8_t column);
+void framebuffer_oled_reset();
+void framebuffer_oled_clear_row(uint8_t row);
+void framebuffer_oled_print_letter(char data);
+void framebuffer_oled_print(const char *str);
+void framebuffer_oled_arrow(uint8_t row);
+void framebuffer_oled_arrow_reset(uint8_t row);
 #endif
