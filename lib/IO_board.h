@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <util/delay.h>
 #define SSIO_board PB3
+#define USE_ADC
 
 enum directionX { NEUTRALX, RIGHT, LEFT };
 
@@ -90,12 +91,12 @@ void read_slider(slider *slider);
 void read_buttons(buttons *buttons);
 void digital_write_led(char led, char value);
 void analog_write_led(char led, char value);
-void joystick_calibrate(calib_parameters *);
+void joystick_calibrate(joystick *joystick);
 
 #ifndef USE_ADC
 void read_touchpad(touchpad *touchpad);
 void read_joystick(joystick *joystick);
 #else
-joystick joystick_read(analog_input analog_in, calib_parameters parameters);
-touchpad touchpad_read();
+void joystick_read(joystick *joystick, analog_input analog_in);
+void touchpad_read(touchpad *touchpad, analog_input analog_in);
 #endif
