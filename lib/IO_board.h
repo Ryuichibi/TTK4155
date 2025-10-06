@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include <util/delay.h>
 #define SSIO_board PB3
-#define USE_ADC
 
 enum directionX { NEUTRALX, RIGHT, LEFT };
 
@@ -27,8 +26,8 @@ typedef struct slider {
 } slider;
 
 typedef struct joystick {
-    char x_pos_raw;
-    char y_pos_raw;
+    uint8_t x_pos_raw;
+    uint8_t y_pos_raw;
     char button;
 
     uint8_t x_pos;
@@ -79,8 +78,8 @@ typedef struct buttons {
 } buttons;
 
 typedef struct touchpad {
-    char x_pos_raw;
-    char y_pos_raw;
+    uint8_t x_pos_raw;
+    uint8_t y_pos_raw;
     
     uint8_t x_pos;
     uint8_t y_pos;
@@ -92,11 +91,5 @@ void read_buttons(buttons *buttons);
 void digital_write_led(char led, char value);
 void analog_write_led(char led, char value);
 void joystick_calibrate(joystick *joystick);
-
-#ifndef USE_ADC
 void read_touchpad(touchpad *touchpad);
-void read_joystick(joystick *joystick);
-#else
-void joystick_read(joystick *joystick, analog_input analog_in);
-void touchpad_read(touchpad *touchpad, analog_input analog_in);
-#endif
+void read_joystick(joystick *joystick, analog_input analog_in);
