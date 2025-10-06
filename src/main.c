@@ -1,4 +1,6 @@
+#include <stdint.h>
 #define F_CPU 4915200
+#include "../lib/IO_board.h"
 #include "../lib/analog.h"
 #include "../lib/oled.h"
 #include "../lib/spi.h"
@@ -13,6 +15,9 @@
 unsigned char data;
 FILE *UART;
 joystick joystick_1;
+touchpad touchpad_1;
+slider slider_1;
+buttons buttons_1;
 analog_input analog_data;
 
 void print_menu(menu *menu)
@@ -29,22 +34,13 @@ void print_menu(menu *menu)
 
 int main()
 {
-
+  
     UART = uart_init(9600);
-
     sram_init();
-    // sram_test();
-
-    analog_init();
-    calib_parameters calibration_values = {0, -1, 0, -1, 0, -1, 0, -1};
-    // x_max = left, x_min = right, y_max = down, y_min = up
-    joystick_calibrate(&calibration_values);
-    printf("y_min: %d, xmin: %d, ymax: %d,x_max %d", calibration_values.y_min,
-           calibration_values.x_min, calibration_values.y_max,
-           calibration_values.x_max);
-
     spi_init();
-    oled_init();
+  analog_init();
+  joystick_1.parameters.x_min = 50;
+  joystick_1.parameters.y_min = 50;
 
     menu *main_menu = malloc(sizeof(menu));
     main_menu->sub_menus = malloc(sizeof(menu*) * 3);
@@ -75,9 +71,14 @@ int main()
     print_menu(current_menu);
 
     while (1) {
-        joystick_1 = joystick_read(analog_read(), calibration_values);
-        
+        analog_data = analog_read();
+        read_joystick(&joystick_1, analog_data);
+        read_touchpad(&touchpad_1);
 
+        printf("%d\t", (uint8_t)touchpad_1.y_pos);
+        printf("%d\n", (uint8_t)touchpad_1.x_pos);
+    
+    
         // Move along menu entries
         if (joystick_1.direction_y == 1) 
         {
@@ -112,6 +113,7 @@ int main()
         
         _delay_ms(150);
         //spi_send_char(0xaf, PB4);
+
     }
     return 0;
 }

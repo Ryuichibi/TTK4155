@@ -1,4 +1,5 @@
 #include "oled.h"
+#include "spi.h"
 #define SLAVE_SELECT PB4
 #define COMMAND_DATA PB2
 #include "../font.h"
@@ -82,14 +83,18 @@ void oled_clear_row(uint8_t row)
 void oled_write_data(char data)
 {
     PORTB |= (1 << COMMAND_DATA);
-    spi_send_char(data, SLAVE_SELECT);
+    spi_open_com(SLAVE_SELECT);
+    spi_send_char(data);
+    spi_close_com(SLAVE_SELECT);
     PORTB &= ~(1 << COMMAND_DATA);
 }
 
 void oled_write_command(char command)
 {
     PORTB &= ~(1 << COMMAND_DATA);
-    spi_send_char(command, SLAVE_SELECT);
+    spi_open_com(SLAVE_SELECT);
+    spi_send_char(command);
+    spi_close_com(SLAVE_SELECT);
 }
 
 void oled_print_letter(char data)
@@ -98,7 +103,7 @@ void oled_print_letter(char data)
         char encoded_data = pgm_read_byte(&font8[(uint8_t)data - 0x20][i]); // probably needs an offset of 20 for the encoding
                            // to work properly, but it should print something
                            // that looks like an alphanumerical character
-        spi_send_char(encoded_data, SLAVE_SELECT);
+        oled_write_data(encoded_data);
     }
  }
 
