@@ -2,6 +2,9 @@
 #define SLAVE_SELECT PB4
 #define COMMAND_DATA PB2
 #include "../font.h"
+
+uint8_t last_tick; // Variable to trigger the update of the display 
+
 void oled_init()
 {
     // Set D/C as output
@@ -30,10 +33,10 @@ void oled_init()
     oled_write_command(SET_DISPLAY_NOT_INVERTED);
     //oled_write_command(SET_DISPLAY_INVERTED);
     oled_write_command(DISPLAY_ON_NORMAL_MODE);
-
-
-
     oled_reset();
+
+    TCCR0 = (1 << CS02) | (1 << CS00); // Prescaler 1024, setting timer/counter to f_cpu/1024 = 4800Hz
+    last_tick = TCNT0; // Initialize last_tick to current timer value
 }
 
 void oled_reset()
@@ -134,8 +137,6 @@ void oled_arrow_reset(uint8_t row)
     oled_write_data (0x00);
 }
 
-
-
 void oled_set_brightness(uint8_t level)
 {
     oled_write_command(SET_CONTRAST_CONTROL);
@@ -143,12 +144,16 @@ void oled_set_brightness(uint8_t level)
 }
 
 void oled_update_display(){  // This function writes the entire framebuffer (SRAM) to the display
+
+    if ((uint8_t)(TCNT0 - last_tick) > 160){ // Update ever ~33ms, i.e. ~30Hz
+    last_tick = TCNT0;
+
     oled_position(0,0);
     PORTB |= (1 << COMMAND_DATA);
-
     for (uint16_t addr = 0; addr < PAGES*COLUMNS ; addr++){
         spi_send_char(sram_read(addr), SLAVE_SELECT);
     }
-
     PORTB &= ~(1 << COMMAND_DATA);
+
+    }
 }
