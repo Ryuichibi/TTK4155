@@ -124,9 +124,14 @@ void joystick_read(joystick *joystick, analog_input analog_in)
 {
     joystick->x_pos_raw = analog_in.analog_ch1;
     joystick->y_pos_raw = analog_in.analog_ch0;
-  //maybe the following should be moved to the calibration function, to avoid unnecesairy calculations
-    uint8_t x_zero = (joystick->parameters.x_neutral_max + joystick->parameters.x_neutral_min) / 2;
-    uint8_t y_zero = (joystick->parameters.y_neutral_max + joystick->parameters.y_neutral_min) / 2;
+    // maybe the following should be moved to the calibration function, to avoid
+    // unnecesairy calculations
+    uint8_t x_zero = (joystick->parameters.x_neutral_max +
+                      joystick->parameters.x_neutral_min) /
+                     2;
+    uint8_t y_zero = (joystick->parameters.y_neutral_max +
+                      joystick->parameters.y_neutral_min) /
+                     2;
 
     if (joystick->x_pos_raw > joystick->parameters.x_max) {
         joystick->parameters.x_max = joystick->x_pos_raw;
@@ -210,17 +215,17 @@ void analog_write_led(char led, char value)
 
 void joystick_calibrate(joystick *joystick)
 {
-#ifndef USE_ADC
-    joystick_read(joystick);
-#else
-    joystick_read(joystick, analog_read());
-#endif
     printf("Joystick Calibration Started!\n");
     printf("Keep joystick neutral\n");
 
     _delay_ms(2000);
 
     for (uint8_t i = 0; i < 10; i++) {
+#ifndef USE_ADC
+        joystick_read(joystick);
+#else
+        joystick_read(joystick, analog_read());
+#endif
         if (joystick->y_pos_raw < joystick->parameters.y_neutral_min) {
             joystick->parameters.y_neutral_min = joystick->y_pos_raw - 2;
         }
