@@ -46,29 +46,29 @@ int main()
     mcp2515_bit_modify(0x60, 0b01100000, 0xff);
 
 
-    mcp2515_bit_modify(MCP2515_CANCTRL, MCP2515_MODE_MASK, MCP2515_LOOPBACK_MODE);
+    mcp2515_bit_modify(MCP_CANCTRL, MODE_MASK, MODE_LOOPBACK);
     _delay_ms(2);
     uint8_t value;
-    mcp2515_read(MCP2515_CANSTAT, &value);
-    if ((value & MCP2515_MODE_MASK) == MCP2515_LOOPBACK_MODE) {
+    mcp2515_read(MCP_CANSTAT, &value);
+    if ((value & MODE_MASK) == MODE_LOOPBACK) {
       printf("HEadwldalø");
     }
 
     _delay_ms(5);
 
     mcp2515_bit_modify(0x2c, 0x01, 0x00);
-    mcp2515_write(MCP2515_TXB0SIDL, 0xff);
+    mcp2515_write(MCP_TXB0SIDL, 0xff);
     mcp2515_request_send(0x01);
     mcp2515_read(0x2c, &value);
     printf("Stat: %x\r\n", value);
-    mcp2515_read(MCP2515_RXB0SIDL, &value);
+    mcp2515_read(MCP_RXB0SIDL, &value);
     printf("mottar: %x\r\n", value);
     mcp2515_bit_modify(0x2c, 0x01, 0x00);
-    mcp2515_write(MCP2515_TXB0SIDL, 0x44);
+    mcp2515_write(MCP_TXB0SIDL, 0x44);
     mcp2515_request_send(0x01);
     mcp2515_read(0x2c, &value);
     printf("Stat: %x\r\n", value);
-    mcp2515_read(MCP2515_RXB0SIDL, &value);
+    mcp2515_read(MCP_RXB0SIDL, &value);
     printf("mottar: %x\r\n", value);
 
     while(1)
