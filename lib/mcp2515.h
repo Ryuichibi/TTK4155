@@ -39,5 +39,16 @@ void mcp2515_reset();
 
 // Registers
 #define MCP2515_CANSTAT 0x0E
+#define MCP2515_CANCTRL 0x0F
+
+#define MCP2515_TXB0SIDH 0x31
+#define MCP2515_RXB0SIDH 0x61
+#define MCP2515_TXB0SIDL 0x32
+#define MCP2515_RXB0SIDL 0x62
+
+#define MCP2515_TXB0CTRL 0x30
+#define MCP2515_RXB0CTRL 0x60
+
+
 
 #endif

@@ -1,16 +1,15 @@
 #include "mcp2515.h"
 
-uint8_t mcp2515_init() 
+uint8_t mcp2515_init()
 {
-    char status;
+    uint8_t status;
 
     mcp2515_reset();
 
     _delay_ms(1);
 
     mcp2515_read(MCP2515_CANSTAT, &status);
-    if ((status & MCP2515_MODE_MASK) != MCP2515_CONFIG_MODE) 
-    {
+    if ((status & MCP2515_MODE_MASK) != MCP2515_CONFIG_MODE) {
         printf("Fail\n");
         return 1;
     }
@@ -21,7 +20,7 @@ uint8_t mcp2515_init()
     return 0;
 }
 
-void mcp2515_read(uint8_t address, uint8_t* data) 
+void mcp2515_read(uint8_t address, uint8_t *data)
 {
     spi_open_com(MCP2515_SLAVE_SELECT);
 
@@ -46,13 +45,12 @@ void mcp2515_write(uint8_t address, uint8_t data)
 void mcp2515_request_send(uint8_t transmit_buffers)
 {
     spi_open_com(MCP2515_SLAVE_SELECT);
-
-    spi_send_char(transmit_buffers | MCP2515_RTS);
-
+    uint8_t command = transmit_buffers | MCP2515_RTS;
+    spi_send_char(command);
     spi_close_com(MCP2515_SLAVE_SELECT);
 }
 
-void mcp2515_read_status(uint8_t* status)
+void mcp2515_read_status(uint8_t *status)
 {
     spi_open_com(MCP2515_SLAVE_SELECT);
 
