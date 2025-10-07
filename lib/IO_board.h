@@ -30,8 +30,8 @@ typedef struct joystick {
     uint8_t y_pos_raw;
     char button;
 
-    uint8_t x_pos;
-    uint8_t y_pos;
+    int8_t x_pos;
+    int8_t y_pos;
 
     enum directionY direction_y;
     enum directionX direction_x;
@@ -69,8 +69,8 @@ typedef struct buttons {
         struct {
             uint8_t nButton : 1;
             uint8_t nRight : 1;
-            uint8_t nLeft : 1;
             uint8_t nDown : 1;
+            uint8_t nLeft : 1;
             uint8_t nUp : 1;
         };
     };

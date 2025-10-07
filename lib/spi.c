@@ -11,8 +11,8 @@ void spi_init()
     DDRB &= ~(1 << PB6);
 
     // Set up SS signals
-    DDRB |= (1 << PB4) | (1 << PB3);
-    PORTB |= (1 << PB4) | (1 << PB3);
+    DDRB |= (1 << PB4) | (1 << PB3) | (1 << PB2);
+    PORTB |= (1 << PB4) | (1 << PB3) | (1 << PB2);
 
     // Enable SPI, Set as Master, SCK = f_osc / 16
     SPCR = (1 << SPE) | (1 << MSTR) | (1 << SPR0);

@@ -1,7 +1,7 @@
 #include "oled.h"
 #include "spi.h"
-#define SLAVE_SELECT PB4
-#define COMMAND_DATA PB2
+#define SLAVE_SELECT PB2
+#define COMMAND_DATA PB1
 #include "../font.h"
 void oled_init()
 {
@@ -75,7 +75,6 @@ void oled_clear_row(uint8_t row)
     oled_goto_column(0);
     for (uint8_t i = 0; i <= 127; i++) {
         oled_write_data(0x00);
-        // TODO this is wrong, and is here only for testing
     }
 }
 
