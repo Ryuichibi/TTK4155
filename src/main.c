@@ -7,6 +7,7 @@
 #include "../lib/spi.h"
 #include "../lib/sram.h"
 #include "../lib/uart.h"
+#include "../lib/mcp2515.h"
 #include <avr/io.h>
 #include <stdio.h>
 #include <string.h>
@@ -39,6 +40,21 @@ int main()
     spi_init();
     analog_init();
     oled_init();
+    mcp2515_init();
+
+    mcp2515_bit_modify(MCP2515_CANSTAT, MCP2515_MODE_MASK, MCP2515_LOOPBACK_MODE);
+    char value = 'a';
+    mcp2515_read(MCP2515_CANSTAT, &value);
+    if ((value & MCP2515_MODE_MASK) == MCP2515_CONFIG_MODE) {
+      printf("HEadwldalø");
+    }
+
+    while(1)
+    {
+      mcp2515_bit_modify(MCP2515_CANSTAT, MCP2515_MODE_MASK, MCP2515_LOOPBACK_MODE);
+    }
+
+
     joystick_1.parameters.x_min = 50;
     joystick_1.parameters.y_min = 50;
 
@@ -75,8 +91,8 @@ int main()
         read_touchpad(&touchpad_1);
         read_buttons(&buttons_1);
 
-        printf("%d\t", joystick_1.x_pos);
-        printf("%d\n", joystick_1.y_pos);
+        //printf("%d\t", joystick_1.x_pos);
+        //printf("%d\n", joystick_1.y_pos);
 
         // Move along menu entries
         if (buttons_1.nDown) {
