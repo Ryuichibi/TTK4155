@@ -51,25 +51,21 @@ int main()
     uint8_t value;
     mcp2515_read(MCP_CANSTAT, &value);
     if ((value & MODE_MASK) == MODE_LOOPBACK) {
-      printf("HEadwldalø");
+      printf("in loopback mode\n");
     }
 
     _delay_ms(5);
 
     mcp2515_bit_modify(0x2c, 0x01, 0x00);
-    mcp2515_write(MCP_TXB0SIDL, 0xff);
+    mcp2515_write(MCP_TXB0SIDH, 0xFF);
+    mcp2515_write(MCP_TXB0SIDL, 0xE0);
     mcp2515_request_send(0x01);
     mcp2515_read(0x2c, &value);
     printf("Stat: %x\r\n", value);
+    mcp2515_read(MCP_RXB0SIDH, &value);
+    printf("IDH mottat: %x\r\n", value);
     mcp2515_read(MCP_RXB0SIDL, &value);
-    printf("mottar: %x\r\n", value);
-    mcp2515_bit_modify(0x2c, 0x01, 0x00);
-    mcp2515_write(MCP_TXB0SIDL, 0x44);
-    mcp2515_request_send(0x01);
-    mcp2515_read(0x2c, &value);
-    printf("Stat: %x\r\n", value);
-    mcp2515_read(MCP_RXB0SIDL, &value);
-    printf("mottar: %x\r\n", value);
+    printf("IDL mottat: %x\r\n", value);
 
     while(1)
     {

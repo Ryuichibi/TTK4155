@@ -1,5 +1,6 @@
 #ifndef __MCP2515_H
 #define __MCP2515_H
+#define CLOCK_SPEED_CAN 16000000
 
 /*
 mcp2515.h
