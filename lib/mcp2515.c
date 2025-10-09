@@ -42,6 +42,21 @@ void mcp2515_write(uint8_t address, uint8_t data)
     spi_close_com(MCP2515_SLAVE_SELECT);
 }
 
+void mcp2515_sequential_write(uint8_t address, uint8_t *data, uint8_t n_entries)
+{
+    spi_open_com(MCP2515_SLAVE_SELECT);
+
+    spi_send_char(MCP_WRITE);
+    spi_send_char(address);
+    
+    for (uint8_t i = 0; i < n_entries; i++) 
+    {
+        spi_send_char(data[i]);
+    }
+
+    spi_close_com(MCP2515_SLAVE_SELECT);
+}
+
 void mcp2515_request_send(uint8_t transmit_buffers)
 {
     spi_open_com(MCP2515_SLAVE_SELECT);

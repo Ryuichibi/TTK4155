@@ -8,6 +8,7 @@
 #include "../lib/sram.h"
 #include "../lib/uart.h"
 #include "../lib/mcp2515.h"
+#include "../lib/can.h"
 #include <avr/io.h>
 #include <stdio.h>
 #include <string.h>
@@ -51,25 +52,29 @@ int main()
     uint8_t value;
     mcp2515_read(MCP_CANSTAT, &value);
     if ((value & MODE_MASK) == MODE_LOOPBACK) {
-      printf("HEadwldalø");
+      printf("HEadwldalø\n");
     }
 
     _delay_ms(5);
 
-    mcp2515_bit_modify(0x2c, 0x01, 0x00);
-    mcp2515_write(MCP_TXB0SIDL, 0xff);
-    mcp2515_request_send(0x01);
-    mcp2515_read(0x2c, &value);
-    printf("Stat: %x\r\n", value);
-    mcp2515_read(MCP_RXB0SIDL, &value);
-    printf("mottar: %x\r\n", value);
-    mcp2515_bit_modify(0x2c, 0x01, 0x00);
-    mcp2515_write(MCP_TXB0SIDL, 0x44);
-    mcp2515_request_send(0x01);
-    mcp2515_read(0x2c, &value);
-    printf("Stat: %x\r\n", value);
-    mcp2515_read(MCP_RXB0SIDL, &value);
-    printf("mottar: %x\r\n", value);
+    can_message_t message;
+    message.id = 1927;
+    message.data_count = 4;
+    message.data[0] = 'H';
+    message.data[1] = 'e';
+    message.data[2] = 'i';
+    message.data[3] = '!';
+
+    can_send(message);
+
+    _delay_ms(5);
+    
+    can_message_t message_r;
+    can_receive(&message_r);
+
+    printf("ID: %d\n", message_r.id);
+    printf("data_count: %d\n", message_r.data_count);
+    printf("Data: %s\n", message_r.data);
 
     while(1)
     {
