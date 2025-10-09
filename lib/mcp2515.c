@@ -10,12 +10,26 @@ uint8_t mcp2515_init()
 
     mcp2515_read(MCP_CANSTAT, &status);
     if ((status & MODE_POWERUP) != MODE_CONFIG) {
-        printf("Fail\n");
+        printf("Failed to enter config mode\n");
         return 1;
     }
+    char CNF1 = SJW1 | BNP;
+    char CNF2 = PRSEG | PHSEG | SAMPLE_3X | BTLMODE_OFF;
+    char CNF3 = SOF_DISABLE | WAKFIL_DISABLE | PHSEG2;
 
-    // More?
-    // Set mode?
+    mcp2515_write(MCP_CNF1, CNF1);
+    mcp2515_write(MCP_CNF2, CNF2);
+    mcp2515_write(MCP_CNF3, CNF3);
+    
+    mcp2515_bit_modify(MCP_RXB0CTRL, 0x60, 0xFF); //mask is set to full "dont care"
+    mcp2515_bit_modify(MCP_RXB1CTRL, 0x60, 0xFF); //mask is set to full "dont care"
+
+    mcp2515_write(MCP_CANCTRL, MODE_NORMAL);
+    mcp2515_read(MCP_CANSTAT, &status);
+    if(status != 0){
+        printf("Failed to enter normal mode\n");
+        return 1;
+  }
 
     return 0;
 }

@@ -52,7 +52,7 @@ int main()
     uint8_t value;
     mcp2515_read(MCP_CANSTAT, &value);
     if ((value & MODE_MASK) == MODE_LOOPBACK) {
-      printf("HEadwldalø\n");
+      printf("in loopback mode\n");
     }
 
     _delay_ms(5);
