@@ -76,10 +76,7 @@ int main()
     printf("data_count: %d\n", message_r.data_count);
     printf("Data: %s\n", message_r.data);
 
-    while(1)
-    {
-    }
-
+    _delay_ms(2000);
 
     joystick_1.parameters.x_min = 50;
     joystick_1.parameters.y_min = 50;
@@ -117,9 +114,6 @@ int main()
         read_touchpad(&touchpad_1);
         read_buttons(&buttons_1);
 
-        //printf("%d\t", joystick_1.x_pos);
-        //printf("%d\n", joystick_1.y_pos);
-
         // Move along menu entries
         if (buttons_1.nDown) {
             oled_arrow_reset(current_menu->selected);
@@ -136,17 +130,17 @@ int main()
             oled_arrow(current_menu->selected);
         }
 
-        if (!(PINB & (1 << PB0)) && current_menu->sub_menus) {
+        if (buttons_1.nButton) {
             printf("%s\n",
                    current_menu->sub_menus[current_menu->selected]->value);
         }
 
-        if (joystick_1.direction_x == 1 &&
+        if (buttons_1.nLeft &&
             current_menu->sub_menus[current_menu->selected]->sub_menus) {
             current_menu = current_menu->sub_menus[current_menu->selected];
             oled_reset();
             print_menu(current_menu);
-        } else if (joystick_1.direction_x == 2 && current_menu->parent_menu) {
+        } else if (buttons_1.nRight && current_menu->parent_menu) {
             current_menu = current_menu->parent_menu;
             oled_reset();
             print_menu(current_menu);

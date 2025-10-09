@@ -131,6 +131,11 @@ void joystick_calibrate(joystick *joystick)
     printf("Joystick Calibration Started!\n");
     printf("Keep joystick neutral\n");
 
+    joystick->parameters.x_neutral_max = 127;
+    joystick->parameters.x_neutral_min = 127;
+    joystick->parameters.y_neutral_max = 127;
+    joystick->parameters.y_neutral_min = 127;
+
     _delay_ms(2000);
 
     for (uint8_t i = 0; i < 10; i++) {
