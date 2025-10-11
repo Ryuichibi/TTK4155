@@ -1,3 +1,6 @@
+#ifndef IO_BOARD_H
+#define IO_BOARD_H
+
 #include "analog.h"
 #include "spi.h"
 #include <stdint.h>
@@ -93,3 +96,5 @@ void analog_write_led(char led, char value);
 void joystick_calibrate(joystick *joystick);
 void read_touchpad(touchpad *touchpad);
 void read_joystick(joystick *joystick, analog_input analog_in);
+
+#endif

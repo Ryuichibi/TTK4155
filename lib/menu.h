@@ -21,7 +21,7 @@ struct menu {
 
 menu * create_menu(uint8_t n_entries, char* value, menu* parent, uint8_t selected);
 void print_menu(menu *menu);
-void navigate_menu(menu *current_menu, buttons buttons_1);
+menu * navigate_menu(menu *current_menu, buttons buttons_1);
 
 
 #endif

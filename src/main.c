@@ -80,7 +80,7 @@ int main()
     main_menu->sub_menus[1] = create_menu(2, "Scoreboard", main_menu, 0);
     main_menu->sub_menus[2] = create_menu(0, "Cali Joystick", main_menu, 0);
     main_menu->sub_menus[1]->sub_menus[0] = create_menu(0, "Test1", main_menu->sub_menus[1], 0);
-    main_menu->sub_menus[1]->sub_menus[0] = create_menu(0, "Test2", main_menu->sub_menus[1], 0);
+    main_menu->sub_menus[1]->sub_menus[1] = create_menu(0, "Test2", main_menu->sub_menus[1], 0);
     menu *current_menu = main_menu;
     print_menu(current_menu);
 
@@ -90,7 +90,7 @@ int main()
         read_touchpad(&touchpad_1);
         read_buttons(&buttons_1);
 
-        navigate_menu(current_menu, buttons_1);
+        current_menu = navigate_menu(current_menu, buttons_1);
 
         _delay_ms(150);
     }

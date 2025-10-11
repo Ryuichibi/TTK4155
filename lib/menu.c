@@ -20,6 +20,7 @@ menu *create_menu(uint8_t n_entries, char* value, menu* parent, uint8_t selected
         temp->parent_menu = parent;
     }
 
+    temp->n_entries = n_entries;
     temp->selected = selected;
 
     return temp;
@@ -37,7 +38,7 @@ void print_menu(menu *menu)
     oled_arrow(menu->selected);
 }
 
-void navigate_menu(menu *current_menu, buttons buttons_1) 
+menu * navigate_menu(menu *current_menu, buttons buttons_1) 
 {
     // Move up
     if (buttons_1.nDown) 
@@ -68,14 +69,18 @@ void navigate_menu(menu *current_menu, buttons buttons_1)
     // Go into submenu
     if (buttons_1.nLeft &&
         current_menu->sub_menus[current_menu->selected]->sub_menus) {
-        current_menu = current_menu->sub_menus[current_menu->selected];
         oled_reset();
-        print_menu(current_menu);
+        print_menu(current_menu->sub_menus[current_menu->selected]);
+        return current_menu->sub_menus[current_menu->selected];
     } 
     // Go to parent menu
     else if (buttons_1.nRight && current_menu->parent_menu) {
-        current_menu = current_menu->parent_menu;
         oled_reset();
-        print_menu(current_menu);
+        print_menu(current_menu->parent_menu);
+        return current_menu->parent_menu;
+    } 
+    
+    else {
+        return current_menu;
     }
 }
