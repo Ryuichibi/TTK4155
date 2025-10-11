@@ -22,17 +22,6 @@ slider slider_1;
 buttons buttons_1;
 analog_input analog_data;
 
-void print_menu(menu *menu)
-{
-    for (uint8_t i = 0; i < menu->n_entries; i++) {
-        oled_goto_row(0x00 | i);
-        oled_goto_column(0x09);
-        oled_print(menu->sub_menus[i]->value,
-                   strlen(menu->sub_menus[i]->value));
-    }
-    oled_arrow(menu->selected);
-}
-
 int main()
 {
 
@@ -76,36 +65,23 @@ int main()
     printf("data_count: %d\n", message_r.data_count);
     printf("Data: %s\n", message_r.data);
 
+    // Setup joystick button
+    DDRB &= ~(1 << PB0);
+    PORTA &= ~(1 << PA0);
+
     _delay_ms(2000);
 
     joystick_1.parameters.x_min = 50;
     joystick_1.parameters.y_min = 50;
 
-    menu *main_menu = malloc(sizeof(menu));
-    main_menu->sub_menus = malloc(sizeof(menu *) * 3);
-    main_menu->n_entries = 3;
-    main_menu->selected = 0;
-    main_menu->sub_menus[0] = malloc(sizeof(menu));
-    main_menu->sub_menus[1] = malloc(sizeof(menu));
-    main_menu->sub_menus[2] = malloc(sizeof(menu));
-    main_menu->sub_menus[0]->value = "New game";
-    main_menu->sub_menus[1]->value = "Scoreboard";
-    main_menu->sub_menus[2]->value = "Cali Joystick";
-    main_menu->sub_menus[1]->parent_menu = main_menu;
-    main_menu->sub_menus[1]->sub_menus = malloc(sizeof(menu *) * 2);
-    main_menu->sub_menus[1]->n_entries = 2;
-    main_menu->sub_menus[1]->selected = 0;
-    main_menu->sub_menus[1]->sub_menus[0] = malloc(sizeof(menu));
-    main_menu->sub_menus[1]->sub_menus[1] = malloc(sizeof(menu));
-    main_menu->sub_menus[1]->sub_menus[0]->value = "Test1";
-    main_menu->sub_menus[1]->sub_menus[1]->value = "Test2";
-
-    // Setup joystick button
-    DDRB &= ~(1 << PB0);
-    PORTA &= ~(1 << PA0);
-
+    // Menu setup
+    menu *main_menu = create_menu(3, NULL, NULL, 0);
+    main_menu->sub_menus[0] = create_menu(0, "New Game", main_menu, 0);
+    main_menu->sub_menus[1] = create_menu(2, "Scoreboard", main_menu, 0);
+    main_menu->sub_menus[2] = create_menu(0, "Cali Joystick", main_menu, 0);
+    main_menu->sub_menus[1]->sub_menus[0] = create_menu(0, "Test1", main_menu->sub_menus[1], 0);
+    main_menu->sub_menus[1]->sub_menus[0] = create_menu(0, "Test2", main_menu->sub_menus[1], 0);
     menu *current_menu = main_menu;
-
     print_menu(current_menu);
 
     while (1) {
@@ -114,37 +90,7 @@ int main()
         read_touchpad(&touchpad_1);
         read_buttons(&buttons_1);
 
-        // Move along menu entries
-        if (buttons_1.nDown) {
-            oled_arrow_reset(current_menu->selected);
-            current_menu->selected = (current_menu->selected == 0)
-                                         ? current_menu->n_entries - 1
-                                         : current_menu->selected - 1;
-            oled_arrow(current_menu->selected);
-        } else if (buttons_1.nUp) {
-            oled_arrow_reset(current_menu->selected);
-            current_menu->selected =
-                (current_menu->selected == current_menu->n_entries - 1)
-                    ? 0
-                    : current_menu->selected + 1;
-            oled_arrow(current_menu->selected);
-        }
-
-        if (buttons_1.nButton) {
-            printf("%s\n",
-                   current_menu->sub_menus[current_menu->selected]->value);
-        }
-
-        if (buttons_1.nLeft &&
-            current_menu->sub_menus[current_menu->selected]->sub_menus) {
-            current_menu = current_menu->sub_menus[current_menu->selected];
-            oled_reset();
-            print_menu(current_menu);
-        } else if (buttons_1.nRight && current_menu->parent_menu) {
-            current_menu = current_menu->parent_menu;
-            oled_reset();
-            print_menu(current_menu);
-        }
+        navigate_menu(current_menu, buttons_1);
 
         _delay_ms(150);
     }
