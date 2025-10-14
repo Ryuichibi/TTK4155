@@ -15,6 +15,9 @@
 #include "lib/time.h"
 #include "lib/can.h"
 
+#define F_CPU 84000000
+#define F_CAN F_CPU/2
+
 int main()
 {
     SystemInit();
@@ -22,21 +25,30 @@ int main()
     WDT->WDT_MR = WDT_MR_WDDIS; //Disable Watchdog Timer
 
     //Uncomment after including uart above
-    uart_init(84000000, 9600);
+    uart_init(F_CPU, 9600);
     printf("Hello World\n\r");
 
-    //PMC->PMC_PCER0 = (1 << ID_PIOB);
+    can_init((CanInit){.brp = F_CPU/2000000-1, .phase1 = 1, .phase2 = 3, .propag = 5, .sjw = 1}, 0);
 
-    //PIOB->PIO_PER = PIO_PER_P13;
-    //PIOB->PIO_OER = PIO_OER_P13;
-
+    CanMsg *msg = malloc(sizeof(CanMsg));
+    CanMsg msg2;
+    msg2.id = 47;
+    msg2.length = 8;
+    Byte8 data = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+    msg2.byte8 = data;
     while (1)
     {
         /* code */
-        PIOB->PIO_SODR = PIO_SODR_P13;
-        time_spinFor(msecs(1000));
-        PIOB->PIO_CODR = PIO_CODR_P13;
-        time_spinFor(msecs(1000));
+        // PIOB->PIO_SODR = PIO_SODR_P13;
+        // time_spinFor(msecs(1000));
+        // PIOB->PIO_CODR = PIO_CODR_P13;
+        // time_spinFor(msecs(1000));
+
+        //can_tx(msg2);
+        if (can_rx(msg))
+        {
+            can_printmsg(*msg);
+        }
 
     }
     
