@@ -12,6 +12,8 @@
  * apt or your favorite package manager.
  */
 #include "lib/uart.h"
+#include "lib/time.h"
+#include "lib/can.h"
 
 int main()
 {
@@ -23,9 +25,19 @@ int main()
     uart_init(84000000, 9600);
     printf("Hello World\n\r");
 
+    //PMC->PMC_PCER0 = (1 << ID_PIOB);
+
+    //PIOB->PIO_PER = PIO_PER_P13;
+    //PIOB->PIO_OER = PIO_OER_P13;
+
     while (1)
     {
         /* code */
+        PIOB->PIO_SODR = PIO_SODR_P13;
+        time_spinFor(msecs(1000));
+        PIOB->PIO_CODR = PIO_CODR_P13;
+        time_spinFor(msecs(1000));
+
     }
     
 }
