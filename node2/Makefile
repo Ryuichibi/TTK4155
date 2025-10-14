@@ -5,8 +5,11 @@ MCUTYPE = __SAM3X8E__
 # In particular, remember to add the UART and CAN starter files.
 # Use relative file paths and a backslash before newline.
 # Do NOT use a backslash after the last file.
+LIB_DIR := lib
+LIB_FILES := $(wildcard $(LIB_DIR)/*.c)
 SOURCE_FILES = \
 	$(BOOTUP) \
+	$(LIB_FILES) \
 	main.c \
 #	../path_to/uart.c \
 #   filename1.c \
