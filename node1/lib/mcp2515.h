@@ -124,7 +124,7 @@ Copyright 2003 Kimberly Otten Software Consulting
 
 // CNF1 Register Values
 
-#define BNP             0x04
+#define BRP             0x01
 #define SJW1            0x00
 #define SJW2            0x40
 #define SJW3            0x80
@@ -133,8 +133,8 @@ Copyright 2003 Kimberly Otten Software Consulting
 
 // CNF2 Register Values
 
-#define PRSEG           0x04    //propagation segment = (PRSEG + 1) * Tq
-#define PHSEG           0x00    //PS1 = (PHSEG + 1) * Tq
+#define PRSEG           0x01    //propagation segment = (PRSEG + 1) * Tq
+#define PHSEG           0x24    //PS1 = (PHSEG + 1) * Tq 
 #define BTLMODE_ON		0x80    //PS2 is determined by PHSEG2 in CNF 3
 #define BTLMODE_OFF		0x00    //PS2 = min(PS1, 2*Tq)
 #define SAMPLE_1X       0x00
@@ -147,7 +147,7 @@ Copyright 2003 Kimberly Otten Software Consulting
 #define SOF_DISABLE		0x00
 #define WAKFIL_ENABLE	0x40
 #define WAKFIL_DISABLE	0x00
-#define PHSEG2          0x01    //if BTLMODE is on, this decides value of 
+#define PHSEG2          0x06    //if BTLMODE is on, this decides value of 
                                 //PS2 by same calculation as PS1
 
 

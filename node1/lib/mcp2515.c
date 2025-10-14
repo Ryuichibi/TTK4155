@@ -13,8 +13,8 @@ uint8_t mcp2515_init()
         printf("Failed to enter config mode\n");
         return 1;
     }
-    char CNF1 = SJW1 | BNP;
-    char CNF2 = PRSEG | PHSEG | SAMPLE_3X | BTLMODE_OFF;
+    char CNF1 = SJW4 | BRP;
+    char CNF2 = PRSEG | PHSEG | SAMPLE_3X | BTLMODE_ON;
     char CNF3 = SOF_DISABLE | WAKFIL_DISABLE | PHSEG2;
 
     mcp2515_write(MCP_CNF1, CNF1);
@@ -29,6 +29,8 @@ uint8_t mcp2515_init()
     if(status != 0){
         printf("Failed to enter normal mode\n");
         return 1;
+  } else {
+        printf("Entered normal mode\n");
   }
 
     return 0;

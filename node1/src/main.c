@@ -32,17 +32,7 @@ int main()
     oled_init();
     mcp2515_init();
 
-
     mcp2515_bit_modify(0x60, 0b01100000, 0xff);
-
-
-    mcp2515_bit_modify(MCP_CANCTRL, MODE_MASK, MODE_LOOPBACK);
-    _delay_ms(2);
-    uint8_t value;
-    mcp2515_read(MCP_CANSTAT, &value);
-    if ((value & MODE_MASK) == MODE_LOOPBACK) {
-      printf("in loopback mode\n");
-    }
 
     _delay_ms(5);
 
@@ -53,17 +43,19 @@ int main()
     message.data[1] = 'e';
     message.data[2] = 'i';
     message.data[3] = '!';
+while (1) {
 
     can_send(message);
+    printf("Message sent\n");
+    mcp2515_request_send(0x01);
+    char *error;
+    mcp2515_read(0x30, error);
+    printf("%01x\n", *error);
 
-    _delay_ms(5);
+    _delay_ms(500);
     
-    can_message_t message_r;
-    can_receive(&message_r);
+}
 
-    printf("ID: %d\n", message_r.id);
-    printf("data_count: %d\n", message_r.data_count);
-    printf("Data: %s\n", message_r.data);
 
     // Setup joystick button
     DDRB &= ~(1 << PB0);
@@ -84,15 +76,4 @@ int main()
     menu *current_menu = main_menu;
     print_menu(current_menu);
 
-    while (1) {
-        analog_data = analog_read();
-        read_joystick(&joystick_1, analog_data);
-        read_touchpad(&touchpad_1);
-        read_buttons(&buttons_1);
-
-        current_menu = navigate_menu(current_menu, buttons_1);
-
-        _delay_ms(150);
-    }
-    return 0;
 }

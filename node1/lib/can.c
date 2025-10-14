@@ -1,4 +1,5 @@
 #include "can.h"
+#include "mcp2515.h"
 
 void can_init()
 {
@@ -18,7 +19,6 @@ void can_send(can_message_t message)
 
     mcp2515_sequential_write(MCP_TXB0D0, message.data, message.data_count);
 
-    mcp2515_request_send(0x01);
 }
 
 void can_receive(can_message_t *message)
