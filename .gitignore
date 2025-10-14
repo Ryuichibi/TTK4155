@@ -1,3 +1,4 @@
 /build
+/node1/build
 compile_commands.json
 /.cache
