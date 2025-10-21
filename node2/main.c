@@ -24,6 +24,16 @@ int main()
 
     WDT->WDT_MR = WDT_MR_WDDIS; //Disable Watchdog Timer
 
+    //PIO->PIO_EN 
+    PMC->PMC_PCER1 |= (1 << 4);
+    PIOB->PIO_PDR |= PIO_PDR_P13;
+    PIOB->PIO_ABSR|= PIO_ABSR_P13;
+
+    PWM->PWM_CLK |= 1;
+    PWM->PWM_CH_NUM[1].PWM_CPRD = 0b00000000000110011010001010000000;
+    PWM->PWM_CH_NUM[1].PWM_CDTY = 0b00000000000011001101000101000000;
+    PWM->PWM_ENA |= 3;
+
     //Uncomment after including uart above
     uart_init(F_CPU, 9600);
     printf("Hello World\n\r");
