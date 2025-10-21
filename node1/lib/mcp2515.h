@@ -134,7 +134,7 @@ Copyright 2003 Kimberly Otten Software Consulting
 // CNF2 Register Values
 
 #define PRSEG           0x01    //propagation segment = (PRSEG + 1) * Tq
-#define PHSEG           0x24    //PS1 = (PHSEG + 1) * Tq 
+#define PHSEG           0x28    //PS1 = (PHSEG + 1) * Tq 
 #define BTLMODE_ON		0x80    //PS2 is determined by PHSEG2 in CNF 3
 #define BTLMODE_OFF		0x00    //PS2 = min(PS1, 2*Tq)
 #define SAMPLE_1X       0x00
