@@ -28,20 +28,6 @@ typedef struct slider {
     uint8_t size;
 } slider;
 
-typedef struct joystick {
-    uint8_t x_pos_raw;
-    uint8_t y_pos_raw;
-    char button;
-
-    int8_t x_pos;
-    int8_t y_pos;
-
-    enum directionY direction_y;
-    enum directionX direction_x;
-    calib_parameters parameters;
-
-} joystick;
-
 typedef struct buttons {
     union {
         char right;
@@ -93,8 +79,6 @@ void read_slider(slider *slider);
 void read_buttons(buttons *buttons);
 void digital_write_led(char led, char value);
 void analog_write_led(char led, char value);
-void joystick_calibrate(joystick *joystick);
 void read_touchpad(touchpad *touchpad);
-void read_joystick(joystick *joystick, analog_input analog_in);
 
 #endif

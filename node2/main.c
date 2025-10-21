@@ -28,7 +28,7 @@ int main()
     uart_init(F_CPU, 9600);
     printf("Hello World\n\r");
 
-    can_init((CanInit){.brp = F_CPU/2000000-1, .phase1 = 1, .phase2 = 3, .propag = 5, .sjw = 1}, 0);
+    can_init((CanInit){.brp = F_CPU/4000000-1, .phase1 = 5, .phase2 = 6, .propag = 1, .sjw = 3}, 0);
 
     CanMsg *msg = malloc(sizeof(CanMsg));
     CanMsg msg2;

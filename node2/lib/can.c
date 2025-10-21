@@ -44,8 +44,8 @@ void can_init(CanInit init, uint8_t rxInterrupt){
     PMC->PMC_PCER1 |= 1 << (ID_CAN0 - 32);
     
     //Set baudrate, Phase1, phase2 and propagation delay for can bus. Must match on all nodes!
-    //CAN0->CAN_BR = init.reg;
-    CAN0->CAN_BR = 0x00143156;
+    CAN0->CAN_BR = init.reg;
+    //CAN0->CAN_BR = 0x00143156;
     
 
 
