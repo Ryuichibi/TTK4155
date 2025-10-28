@@ -40,6 +40,14 @@ int main()
     PWM->PWM_CH_NUM[1].PWM_CDTY = CDTY_L;
     PWM->PWM_ENA |= 2;
 
+    PMC->PMC_PCER1 |= (1 << 5);
+    ADC->ADC_MR = 0;
+    ADC->ADC_CHER = 1;
+    ADC->ADC_IER = ADC_IER_COMPE;
+    ADC->ADC_EMR = ADC_EMR_CMPMODE_LOW;
+    ADC->ADC_CWR = ADC_CWR_LOWTHRES(200);
+
+
 
 
     //Uncomment after including uart above
@@ -54,17 +62,25 @@ int main()
     msg2.length = 8;
     Byte8 data = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
     msg2.byte8 = data;
+    
 
     while (1)
     {
+        ADC->ADC_CR = 2;
+        // Delay
+        printf("Int %d\n", ((ADC->ADC_ISR & ADC_ISR_COMPE) >> 26));
+        printf("Over: %d\n", ADC->ADC_OVER);
+        time_spinFor(msecs(500));
+        //printf("%d\n", (ADC->ADC_LCDR & 0xFFF));
 
         //can_tx(msg2);
         if (can_rx(msg))
         {
             can_printmsg(*msg);
+            uint16_t cdty_value = CDTY_L - (CDTY_STEP_DIFF * msg->byte[0]);
+            PWM->PWM_CH_NUM[1].PWM_CDTYUPD = cdty_value;
         }
-        uint16_t cdty_value = CDTY_L - (CDTY_STEP_DIFF * msg->byte[0]);
-        PWM->PWM_CH_NUM[1].PWM_CDTYUPD = cdty_value;
+        
 
     }
     
