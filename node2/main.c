@@ -33,12 +33,21 @@ int main()
     PIOB->PIO_ABSR |= PIO_ABSR_P13;
 
     PMC->PMC_PCER1 |= (1 << 4);
+
     PWM->PWM_CLK |= 1;
     PWM->PWM_CLK |= (5 << 8);
     PWM->PWM_CH_NUM[1].PWM_CMR = 0b1011;
     PWM->PWM_CH_NUM[1].PWM_CPRD = 0b1100110100010100;
     PWM->PWM_CH_NUM[1].PWM_CDTY = CDTY_L;
-    PWM->PWM_ENA |= 2;
+
+    PIOB->PIO_PDR |= PIO_PDR_P12;
+    PIOB->PIO_MDDR |= PIO_MDDR_P12;
+    PIOB->PIO_ABSR |= PIO_ABSR_P12;
+
+    PWM->PWM_CH_NUM[0].PWM_CMR = 0b1011;
+    PWM->PWM_CH_NUM[0].PWM_CPRD = 0b1101001;
+    PWM->PWM_CH_NUM[0].PWM_CDTY = 0b1001010;
+    PWM->PWM_ENA |= 3;
 
     PMC->PMC_PCER1 |= (1 << 5);
     ADC->ADC_MR = 0;
@@ -47,6 +56,10 @@ int main()
     ADC->ADC_EMR = ADC_EMR_CMPMODE_LOW;
     ADC->ADC_CWR = ADC_CWR_LOWTHRES(200);
 
+    
+    PIOC->PIO_OER |= PIO_OER_P23;
+    PIOC->PIO_CODR |= PIO_CODR_P23;
+    PIOC->PIO_PER |= PIO_PSR_P23;
 
 
 
@@ -77,8 +90,22 @@ int main()
         if (can_rx(msg))
         {
             can_printmsg(*msg);
-            uint16_t cdty_value = CDTY_L - (CDTY_STEP_DIFF * msg->byte[0]);
-            PWM->PWM_CH_NUM[1].PWM_CDTYUPD = cdty_value;
+            uint16_t cdty_value_x = CDTY_L - (CDTY_STEP_DIFF * msg->byte[0]);
+            PWM->PWM_CH_NUM[1].PWM_CDTYUPD = cdty_value_x;
+
+            if (msg->byte[1] >= 50) 
+            {
+                uint8_t cdty_value_y = 0b1101001 - ((msg->byte[1] - 50) * 2);
+                PWM->PWM_CH_NUM[0].PWM_CDTYUPD = cdty_value_y;
+                PIOC->PIO_CODR |= PIO_CODR_P23;
+            } 
+            else 
+            {
+                uint8_t cdty_value_y = 0b1101001 - ((50 - msg->byte[1]) * 2);
+                PWM->PWM_CH_NUM[0].PWM_CDTYUPD = cdty_value_y;
+                PIOC->PIO_SODR |= PIO_SODR_P23;
+            }
+            
         }
         
 
