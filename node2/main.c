@@ -33,12 +33,21 @@ int main()
     PIOB->PIO_ABSR |= PIO_ABSR_P13;
 
     PMC->PMC_PCER1 |= (1 << 4);
+
     PWM->PWM_CLK |= 1;
     PWM->PWM_CLK |= (5 << 8);
     PWM->PWM_CH_NUM[1].PWM_CMR = 0b1011;
     PWM->PWM_CH_NUM[1].PWM_CPRD = 0b1100110100010100;
     PWM->PWM_CH_NUM[1].PWM_CDTY = CDTY_L;
-    PWM->PWM_ENA |= 2;
+
+    PIOB->PIO_PDR |= PIO_PDR_P12;
+    PIOB->PIO_MDDR |= PIO_MDDR_P12;
+    PIOB->PIO_ABSR |= PIO_ABSR_P12;
+
+    PWM->PWM_CH_NUM[0].PWM_CMR = 0b1011;
+    PWM->PWM_CH_NUM[0].PWM_CPRD = 0b1101001;
+    PWM->PWM_CH_NUM[0].PWM_CDTY = 0b1101001;
+    PWM->PWM_ENA |= 3;
 
     PMC->PMC_PCER1 |= (1 << 5);
     ADC->ADC_MR = 0;
@@ -46,7 +55,30 @@ int main()
     ADC->ADC_IER = ADC_IER_COMPE;
     ADC->ADC_EMR = ADC_EMR_CMPMODE_LOW;
     ADC->ADC_CWR = ADC_CWR_LOWTHRES(200);
+    
+    PIOC->PIO_OER |= PIO_OER_P23;
+    PIOC->PIO_CODR |= PIO_CODR_P23;
+    PIOC->PIO_PER |= PIO_PSR_P23;
 
+
+    // Timer/Counter 2
+
+    // Set up pins
+    PIOC->PIO_PDR |= PIO_PDR_P25;
+    PIOC->PIO_ABSR |= PIO_ABSR_P25;
+    PIOC->PIO_PDR |= PIO_PDR_P26;
+    PIOC->PIO_ABSR |= PIO_ABSR_P26;
+
+
+    REG_PMC_PCER0 |= PMC_PCER0_PID27 | PMC_PCER0_PID28 | PMC_PCER0_PID29 | PMC_PCER0_PID30 | PMC_PCER0_PID31;
+    REG_PMC_PCER1 |= PMC_PCER1_PID32 | PMC_PCER1_PID33 | PMC_PCER1_PID34 | PMC_PCER1_PID35;
+    
+    // XC0 and capture mode
+    TC2->TC_CHANNEL[0].TC_CMR = TC_CMR_TCCLKS_XC0;
+    // activate quadrature encoder, position measure mode
+    TC2->TC_BMR = TC_BMR_POSEN | TC_BMR_QDEN | TC_BMR_EDGPHA | TC_BMR_INVA;
+    // enable clock, reset counter
+    TC2->TC_CHANNEL[0].TC_CCR = TC_CCR_CLKEN | TC_CCR_SWTRG;
 
 
 
@@ -68,17 +100,33 @@ int main()
     {
         ADC->ADC_CR = 2;
         // Delay
-        printf("Int %d\n", ((ADC->ADC_ISR & ADC_ISR_COMPE) >> 26));
-        printf("Over: %d\n", ADC->ADC_OVER);
+        //printf("Int %d\n", ((ADC->ADC_ISR & ADC_ISR_COMPE) >> 26));
+        //printf("Over: %d\n", ADC->ADC_OVER);
         time_spinFor(msecs(500));
         //printf("%d\n", (ADC->ADC_LCDR & 0xFFF));
+
+        printf("Quad %d\n", TC2->TC_CHANNEL[0].TC_CV);
 
         //can_tx(msg2);
         if (can_rx(msg))
         {
             can_printmsg(*msg);
-            uint16_t cdty_value = CDTY_L - (CDTY_STEP_DIFF * msg->byte[0]);
-            PWM->PWM_CH_NUM[1].PWM_CDTYUPD = cdty_value;
+            uint16_t cdty_value_x = CDTY_L - (CDTY_STEP_DIFF * msg->byte[0]);
+            PWM->PWM_CH_NUM[1].PWM_CDTYUPD = cdty_value_x;
+
+            if (msg->byte[1] >= 50) 
+            {
+                uint8_t cdty_value_y = 0b1101001 - ((msg->byte[1] - 50) * 2);
+                PWM->PWM_CH_NUM[0].PWM_CDTYUPD = cdty_value_y;
+                PIOC->PIO_CODR |= PIO_CODR_P23;
+            } 
+            else 
+            {
+                uint8_t cdty_value_y = 0b1101001 - ((50 - msg->byte[1]) * 2);
+                PWM->PWM_CH_NUM[0].PWM_CDTYUPD = cdty_value_y;
+                PIOC->PIO_SODR |= PIO_SODR_P23;
+            }
+            
         }
         
 
