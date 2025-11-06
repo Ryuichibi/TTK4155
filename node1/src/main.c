@@ -44,12 +44,15 @@ void send_inputs(joystick *joystick, uint8_t js_button, touchpad *touchpad)
 {
     can_message_t message;
     message.id = JOYSTICK_ID;
-    message.data_count = 2;
+    message.data_count = 5;
     message.data[0] = joystick->x_pos;
     message.data[1] = joystick->y_pos;
     message.data[2] = js_button;
     message.data[3] = touchpad->x_pos;
     message.data[4] = touchpad->y_pos;
+
+    printf("Tpad: %d\n", message.data[3]);
+    _delay_ms(150);
 
     can_send(message);
     mcp2515_request_send(0x01);
@@ -61,10 +64,6 @@ void send_inputs(joystick *joystick, uint8_t js_button, touchpad *touchpad)
     {
         printf("%01x\n", *error);
     } 
-    else 
-    {
-        printf("Can message sent\n");
-    }
 }
 
 int main()
