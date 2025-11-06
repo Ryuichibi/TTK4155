@@ -126,6 +126,7 @@ int main()
                 break;
             default:
                 printf("Error\n");
+                gamestate = 0;
                 break;
         }
 
