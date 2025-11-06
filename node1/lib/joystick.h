@@ -19,7 +19,6 @@ typedef struct joystick {
 } joystick;
 
 void read_joystick(joystick *joystick, analog_input analog_in);
-void send_joystick(joystick *joystick);
 void joystick_calibrate(joystick *joystick);
 
 #endif

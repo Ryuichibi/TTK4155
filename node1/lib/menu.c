@@ -1,6 +1,6 @@
 #include "menu.h"
 
-menu *create_menu(uint8_t n_entries, char* value, menu* parent, uint8_t selected) 
+menu *create_menu(uint8_t n_entries, char* value, menu* parent, uint8_t selected, void (*function_ptr)()) 
 {
 
     menu *temp = malloc(sizeof(menu));
@@ -20,8 +20,13 @@ menu *create_menu(uint8_t n_entries, char* value, menu* parent, uint8_t selected
         temp->parent_menu = parent;
     }
 
+    if (function_ptr) {
+        temp->function_ptr = function_ptr;
+    }
+
     temp->n_entries = n_entries;
     temp->selected = selected;
+    
 
     return temp;
 
@@ -63,7 +68,11 @@ menu * navigate_menu(menu *current_menu, buttons buttons_1)
     // Button press
     if (buttons_1.nButton) 
     {
+        if (current_menu->sub_menus[current_menu->selected]->function_ptr) {
+            current_menu->sub_menus[current_menu->selected]->function_ptr();
+        }
         printf("%s\n", current_menu->sub_menus[current_menu->selected]->value);
+        
     }
 
     // Go into submenu

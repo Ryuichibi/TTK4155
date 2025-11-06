@@ -20,10 +20,11 @@ uint8_t mcp2515_init()
     mcp2515_write(MCP_CNF1, CNF1);
     mcp2515_write(MCP_CNF2, CNF2);
     mcp2515_write(MCP_CNF3, CNF3);
+
+    mcp2515_bit_modify(MCP_CANINTE, MCP_RX_INT, MCP_RX_INT); // Enable interrupt for receiving
     
     mcp2515_bit_modify(MCP_RXB0CTRL, 0x60, 0xFF); //mask is set to full "dont care"
     mcp2515_bit_modify(MCP_RXB1CTRL, 0x60, 0xFF); //mask is set to full "dont care"
-    mcp2515_bit_modify(MCP_CANINTE ,MCP_RX_INT, MCP_RX_INT); // Enable interrupt for receiving
 
     mcp2515_write(MCP_CANCTRL, MODE_NORMAL);
     mcp2515_read(MCP_CANSTAT, &status);

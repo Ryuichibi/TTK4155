@@ -3,6 +3,7 @@
 #define SLAVE_SELECT PB2
 #define COMMAND_DATA PB1
 #include "../font.h"
+
 void oled_init()
 {
     // Set D/C as output
@@ -144,4 +145,15 @@ void oled_set_brightness(uint8_t level)
 {
     oled_write_command(SET_CONTRAST_CONTROL);
     oled_write_command((char)level);
+}
+
+void oled_score(int score)
+{
+    oled_position(3,53);
+    int hund = score / 100;
+    oled_print_letter((char) (hund + '0'));
+    int ten = (score - hund * 100) / 10;
+    oled_print_letter((char) (ten + '0'));
+    int ones = (score - hund * 100 - ten * 10);
+    oled_print_letter((char) (ones + '0'));
 }

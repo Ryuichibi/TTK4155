@@ -17,9 +17,10 @@ struct menu {
     uint8_t n_entries;
     uint8_t selected;
     menu *parent_menu;
+    void (*function_ptr)();
 };
 
-menu * create_menu(uint8_t n_entries, char* value, menu* parent, uint8_t selected);
+menu * create_menu(uint8_t n_entries, char* value, menu* parent, uint8_t selected, void (*function_ptr)());
 void print_menu(menu *menu);
 menu * navigate_menu(menu *current_menu, buttons buttons_1);
 

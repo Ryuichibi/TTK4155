@@ -1,29 +1,5 @@
 #include "joystick.h"
 
-void send_joystick(joystick *joystick)
-{
-    can_message_t message;
-    message.id = JOYSTICK_ID;
-    message.data_count = 2;
-    message.data[0] = joystick->x_pos;
-    message.data[1] = joystick->y_pos;
-    
-    can_send(message);
-    mcp2515_request_send(0x01);
-
-    char *error;
-    mcp2515_read(0x30, error);
-    
-    if (*error != 0x08) 
-    {
-        printf("%01x\n", *error);
-    } 
-    else 
-    {
-        printf("Joystick message sent\n");
-    }
-}
-
 void read_joystick(joystick *joystick, analog_input analog_in)
 {
     joystick->x_pos_raw = (uint8_t)analog_in.analog_ch1;
