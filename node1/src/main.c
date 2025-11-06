@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <util/delay.h>
+#include <avr/interrupt.h>
 
 unsigned char data;
 FILE *UART;
@@ -25,6 +26,11 @@ analog_input analog_data;
 
 int main()
 {
+
+    SREG |= (1 << 7); // Enable interrupts
+    EMCUCR &= ~(1); // Falling edge for INT2
+    GICR |= (1 << 7); // Interupt INT2
+    
 
     UART = uart_init(9600);
     sram_init();
@@ -95,4 +101,9 @@ int main()
 
     }
 
+}
+
+ISR(INT2_vect) {
+    // Code to execute when the interrupt occurs
+    printf("Interrupt");
 }
