@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include "sam.h"
@@ -14,6 +15,8 @@
 #include "lib/uart.h"
 #include "lib/time.h"
 #include "lib/can.h"
+#include "lib/motor_controller.h"
+#include "lib/controller.h"
 
 #define F_CPU 84000000
 #define F_CAN F_CPU/2
@@ -22,22 +25,58 @@
 #define CDTY_H 0b1011100001101100u // This is 2ms 
 #define CDTY_STEP_DIFF 0b11011u
 
+// Controller
+int16_t reference;
+int16_t integral_sum = 0;
+int16_t output;
+int32_t x;
+int16_t error;
+
+void TC0_Handler()
+{
+    read_encoder(&x);
+    error = reference - x;
+
+    
+    integral_sum += error;
+    output = K_P * error + K_I * CONTROLLER_PERIOD * integral_sum;
+    if (output >= 100){
+        set_motor_speed(100, false);
+    }else if (output <= -100) {
+        set_motor_speed(100, true);
+    }else if(output < 0){
+        set_motor_speed(output * -1, true);
+    } else {
+        set_motor_speed(output, false);
+    }
+    // insert controller code here
+    TC0->TC_CHANNEL[0].TC_SR;
+    NVIC_ClearPendingIRQ(ID_TC0);
+}
+
+
 int main()
 {
     SystemInit();
 
     WDT->WDT_MR = WDT_MR_WDDIS; //Disable Watchdog Timer
-
+    
     PIOB->PIO_PDR |= PIO_PDR_P13;
     PIOB->PIO_MDDR |= PIO_MDDR_P13;
     PIOB->PIO_ABSR |= PIO_ABSR_P13;
 
+    PIOB->PIO_PER |= PIO_PER_P27; // Solenoid pin
+    PIOB->PIO_OER |= PIO_OER_P27; // Solenoid pin
+
     PMC->PMC_PCER1 |= (1 << 4);
+    motor_init();
+
     PWM->PWM_CLK |= 1;
     PWM->PWM_CLK |= (5 << 8);
     PWM->PWM_CH_NUM[1].PWM_CMR = 0b1011;
     PWM->PWM_CH_NUM[1].PWM_CPRD = 0b1100110100010100;
     PWM->PWM_CH_NUM[1].PWM_CDTY = CDTY_L;
+
     PWM->PWM_ENA |= 2;
 
     PMC->PMC_PCER1 |= (1 << 5);
@@ -47,7 +86,7 @@ int main()
     ADC->ADC_EMR = ADC_EMR_CMPMODE_LOW;
     ADC->ADC_CWR = ADC_CWR_LOWTHRES(200);
 
-
+    encoder_init();
 
 
     //Uncomment after including uart above
@@ -63,25 +102,48 @@ int main()
     Byte8 data = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
     msg2.byte8 = data;
     
+    uint64_t time_last = 0; 
 
     while (1)
     {
         ADC->ADC_CR = 2;
         // Delay
-        printf("Int %d\n", ((ADC->ADC_ISR & ADC_ISR_COMPE) >> 26));
-        printf("Over: %d\n", ADC->ADC_OVER);
-        time_spinFor(msecs(500));
+        //printf("Int %d\n", ((ADC->ADC_ISR & ADC_ISR_COMPE) >> 26));
+        //printf("Over: %d\n", ADC->ADC_OVER);
         //printf("%d\n", (ADC->ADC_LCDR & 0xFFF));
 
         //can_tx(msg2);
         if (can_rx(msg))
         {
-            can_printmsg(*msg);
+            //can_printmsg(*msg);
             uint16_t cdty_value = CDTY_L - (CDTY_STEP_DIFF * msg->byte[0]);
             PWM->PWM_CH_NUM[1].PWM_CDTYUPD = cdty_value;
+
+            printf("Joystick x: %d\n\r", msg->byte[0]);
+            printf("Joystick y: %d\n\r", msg->byte[1]);
+
+
+            if (msg->byte[2] && ((time_now() - time_last) > msecs(1000)))
+            {
+                PIOB->PIO_CODR |= PIO_CODR_P27; // bang
+                time_last = time_now();
+                
+                // Prints
+                printf("Error %d\t", output);
+                printf("Integral %d\t", integral_sum);
+                printf("Reference %d\t", reference);
+                printf("X %d\t", x);
+                printf("Error %d\n\r", error);
+            }
+            if ((time_now() - time_last) > msecs(100)) 
+            {
+                PIOB->PIO_SODR |= PIO_SODR_P27; // boing
+            }
+           
+            reference = (msg->byte[3]*50) ;
+            printf("Reference set to %d\n\r", reference);
         }
         
-
     }
     
 }
