@@ -3,7 +3,7 @@
 
 void can_init()
 {
-
+    
 }
 
 void can_send(can_message_t message)

@@ -32,6 +32,9 @@ int16_t output;
 int32_t x;
 int16_t error;
 
+// Game state
+bool game_start = false;
+
 void TC0_Handler()
 {
     read_encoder(&x);
@@ -52,6 +55,11 @@ void TC0_Handler()
     // insert controller code here
     TC0->TC_CHANNEL[0].TC_SR;
     NVIC_ClearPendingIRQ(ID_TC0);
+}
+
+void score_update(int16_t score_delta)
+{
+    
 }
 
 
@@ -97,51 +105,84 @@ int main()
 
     CanMsg *msg = malloc(sizeof(CanMsg));
     CanMsg msg2;
-    msg2.id = 47;
-    msg2.length = 8;
-    Byte8 data = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
-    msg2.byte8 = data;
+    msg2.id = 2;
+    msg2.length = 1;
+    //Byte8 data = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+    msg2.byte[0] = 0;
+    msg2.byte[1] = 0;
     
-    uint64_t time_last = 0; 
+    uint64_t time_last_solenoid = 0; 
+    uint64_t time_last_score = 0;
+    uint16_t score = 0;
 
     while (1)
     {
         ADC->ADC_CR = 2;
         // Delay
-        //printf("Int %d\n", ((ADC->ADC_ISR & ADC_ISR_COMPE) >> 26));
+        printf("Int %d\n", ((ADC->ADC_ISR & ADC_ISR_COMPE) >> 26));
         //printf("Over: %d\n", ADC->ADC_OVER);
         //printf("%d\n", (ADC->ADC_LCDR & 0xFFF));
-
+        /*
+        printf("%d\t", output);
+        printf("%d\t", error);
+        printf("%d\t", reference);
+        printf("%d\n\r", x);
         //can_tx(msg2);
-        if (can_rx(msg))
+        */
+
+        if (can_rx(msg) && msg->id == 1 && !game_start)
         {
+            game_start = true;
+        }
+
+
+        if (game_start) // Game is running
+        {
+            can_rx(msg);
             //can_printmsg(*msg);
             uint16_t cdty_value = CDTY_L - (CDTY_STEP_DIFF * msg->byte[0]);
             PWM->PWM_CH_NUM[1].PWM_CDTYUPD = cdty_value;
 
-            printf("Joystick x: %d\n\r", msg->byte[0]);
-            printf("Joystick y: %d\n\r", msg->byte[1]);
+            //printf("Joystick x: %d\n\r", msg->byte[0]);
+            //printf("Joystick y: %d\n\r", msg->byte[1]);
 
 
-            if (msg->byte[2] && ((time_now() - time_last) > msecs(1000)))
+            if (msg->byte[2] && ((time_now() - time_last_solenoid) > msecs(500))) // Push out the solenoid
             {
-                PIOB->PIO_CODR |= PIO_CODR_P27; // bang
-                time_last = time_now();
-                
-                // Prints
-                printf("Error %d\t", output);
-                printf("Integral %d\t", integral_sum);
-                printf("Reference %d\t", reference);
-                printf("X %d\t", x);
-                printf("Error %d\n\r", error);
+                PIOB->PIO_CODR |= PIO_CODR_P27; 
+                time_last_solenoid = time_now();
             }
-            if ((time_now() - time_last) > msecs(100)) 
+
+            if ((time_now() - time_last_solenoid) > msecs(70)) // Pull in the solenoid after 70 ms
             {
-                PIOB->PIO_SODR |= PIO_SODR_P27; // boing
+                PIOB->PIO_SODR |= PIO_SODR_P27; 
             }
            
-            reference = (msg->byte[3]*50) ;
-            printf("Reference set to %d\n\r", reference);
+            if ((time_now() - time_last_score) > seconds(1)) // Increase score every 1 s
+            {
+                score += 1;
+
+                msg2.id = 2;
+                msg2.length = 2;
+                msg2.byte[0] = score & 0xFF;
+                msg2.byte[1] = (score >> 8) & 0xFF;
+                can_tx(msg2);
+
+                time_last_score = time_now();
+                //printf("Score: %d\n\r", score);
+            }
+
+            if ((ADC->ADC_ISR & ADC_ISR_COMPE) >> 26){ //Checks if a goal is registered
+                game_start = false; // End game
+                score = 0;
+
+                msg2.id = 1;
+                msg2.length = 0;
+                can_tx(msg2);
+            }
+
+            reference = -(msg->byte[3]*60) ;
+            //printf("Reference set to %d\n\r", reference);
         }
         
     }

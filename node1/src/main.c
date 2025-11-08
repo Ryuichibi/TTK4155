@@ -26,7 +26,7 @@ analog_input analog_data;
 
 // Game values
 uint8_t gamestate = 0;
-uint8_t score = 0;
+uint16_t score = 0;
 
 // Menus
 menu *main_menu;
@@ -45,6 +45,17 @@ void send_inputs(joystick *joystick, uint8_t js_button, touchpad *touchpad)
     can_message_t message;
     message.id = JOYSTICK_ID;
     message.data_count = 5;
+
+    if (joystick->x_pos > 45 && joystick->x_pos < 55)
+    {
+        joystick->x_pos = 50;
+    }
+
+    if (joystick->y_pos > 45 && joystick->y_pos < 55)
+    {
+        joystick->y_pos = 50;
+    }
+
     message.data[0] = joystick->x_pos;
     message.data[1] = joystick->y_pos;
     message.data[2] = js_button;
@@ -101,7 +112,7 @@ int main()
     main_menu->sub_menus[2] = create_menu(0, "Cali Joystick", main_menu, 0, NULL);
     main_menu->sub_menus[1]->sub_menus[0] = create_menu(8, "Highscores", main_menu->sub_menus[1], 0, NULL);
     for (uint8_t i = 0; i < 8; i++) {
-        main_menu->sub_menus[1]->sub_menus[0]->sub_menus[i] = create_menu(0, "No score", main_menu->sub_menus[0]->sub_menus[1], 0, NULL);
+        main_menu->sub_menus[1]->sub_menus[0]->sub_menus[i] = create_menu(0, "No score", main_menu->sub_menus[1]->sub_menus[0], 0, NULL);
     }
     main_menu->sub_menus[1]->sub_menus[1] = create_menu(1, "Last Score", main_menu->sub_menus[1], 0, NULL);
     main_menu->sub_menus[1]->sub_menus[1]->sub_menus[0] = create_menu(0, "No score", main_menu->sub_menus[1]->sub_menus[1], 0, NULL);
@@ -128,6 +139,7 @@ int main()
                 gamestate = 0;
                 break;
         }
+        
 
     }
 
