@@ -3,3 +3,4 @@
 /node2/build
 compile_commands.json
 /.cache
+node2/.cache
