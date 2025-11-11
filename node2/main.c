@@ -184,7 +184,10 @@ int main()
                 //printf("Score: %d\n\r", score);
             }
 
-            if (((ADC->ADC_ISR & ADC_ISR_COMPE) >> 26) && score > 0){ //Checks if a goal is registered
+                        reference = -(msg->byte[3]*60) ;
+            //printf("Reference set to %d\n\r", reference);
+        }
+        if ((ADC->ADC_ISR & ADC_ISR_COMPE) && (score > 0) ){ //Checks if a goal is registered
                 ADC->ADC_ISR; //Clear interrupt flag
                 game_start = false; // End game
                 score = 0;
@@ -195,10 +198,7 @@ int main()
                 printf("Goal!\n\r");
             }
 
-            reference = -(msg->byte[3]*60) ;
-            //printf("Reference set to %d\n\r", reference);
-        }
-        
+
     }
     
 }
