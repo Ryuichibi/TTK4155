@@ -57,6 +57,9 @@ void TC0_Handler()
     NVIC_ClearPendingIRQ(ID_TC0);
 }
 
+
+
+
 void score_update(int16_t score_delta)
 {
     
@@ -92,7 +95,7 @@ int main()
     ADC->ADC_CHER = 1;
     ADC->ADC_IER = ADC_IER_COMPE;
     ADC->ADC_EMR = ADC_EMR_CMPMODE_LOW;
-    ADC->ADC_CWR = ADC_CWR_LOWTHRES(500);
+    ADC->ADC_CWR = ADC_CWR_LOWTHRES(200);
 
     encoder_init();
 
@@ -136,7 +139,7 @@ int main()
             printf("Received message from ID 3\n");
         }
 
-        printf("%d\n", ADC->ADC_ISR & ADC_ISR_COMPE);
+        //printf("%d\n", ADC->ADC_ISR & ADC_ISR_COMPE);
         if (game_start) // Game is running
         {
             can_rx(msg);
@@ -182,6 +185,7 @@ int main()
             }
 
             if (((ADC->ADC_ISR & ADC_ISR_COMPE) >> 26) && score > 0){ //Checks if a goal is registered
+                ADC->ADC_ISR; //Clear interrupt flag
                 game_start = false; // End game
                 score = 0;
 
