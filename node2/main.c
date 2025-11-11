@@ -92,7 +92,7 @@ int main()
     ADC->ADC_CHER = 1;
     ADC->ADC_IER = ADC_IER_COMPE;
     ADC->ADC_EMR = ADC_EMR_CMPMODE_LOW;
-    ADC->ADC_CWR = ADC_CWR_LOWTHRES(200);
+    ADC->ADC_CWR = ADC_CWR_LOWTHRES(400);
 
     encoder_init();
 
@@ -119,7 +119,7 @@ int main()
     {
         ADC->ADC_CR = 2;
         // Delay
-        printf("Int %d\n", ((ADC->ADC_ISR & ADC_ISR_COMPE) >> 26));
+        //printf("Int %d\n", ((ADC->ADC_ISR & ADC_ISR_COMPE) >> 26));
         //printf("Over: %d\n", ADC->ADC_OVER);
         //printf("%d\n", (ADC->ADC_LCDR & 0xFFF));
         /*
@@ -133,12 +133,20 @@ int main()
         if (can_rx(msg) && msg->id == 1 && !game_start)
         {
             game_start = true;
+            printf("Received message from ID 1\n");
         }
 
 
         if (game_start) // Game is running
         {
-            can_rx(msg);
+            if(can_rx(msg)){
+            can_printmsg(*msg);
+            }
+            
+            if (msg->length == 0) {
+                continue;
+            }
+
             //can_printmsg(*msg);
             uint16_t cdty_value = CDTY_L - (CDTY_STEP_DIFF * msg->byte[0]);
             PWM->PWM_CH_NUM[1].PWM_CDTYUPD = cdty_value;
@@ -179,6 +187,7 @@ int main()
                 msg2.id = 1;
                 msg2.length = 0;
                 can_tx(msg2);
+                printf("Goal!\n\r");
             }
 
             reference = -(msg->byte[3]*60) ;
