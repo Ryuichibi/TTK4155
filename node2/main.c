@@ -130,20 +130,18 @@ int main()
         //can_tx(msg2);
         */
 
-        if (can_rx(msg) && msg->id == 1 && !game_start)
+        if (can_rx(msg) && msg->id == 3 && !game_start)
         {
             game_start = true;
-            printf("Received message from ID 1\n");
+            printf("Received message from ID 3\n");
         }
 
 
         if (game_start) // Game is running
         {
-            if(can_rx(msg)){
+            can_rx(msg);
             can_printmsg(*msg);
-            }
-            
-            if (msg->length == 0) {
+            if (msg->id != 4) {
                 continue;
             }
 
@@ -174,7 +172,10 @@ int main()
                 msg2.length = 2;
                 msg2.byte[0] = score & 0xFF;
                 msg2.byte[1] = (score >> 8) & 0xFF;
+                
+                if((time_now() - time_last_solenoid) > msecs(70)) {
                 can_tx(msg2);
+                }
 
                 time_last_score = time_now();
                 //printf("Score: %d\n\r", score);
@@ -186,7 +187,9 @@ int main()
 
                 msg2.id = 1;
                 msg2.length = 0;
+                if((time_now() - time_last_solenoid) > msecs(70)) {
                 can_tx(msg2);
+                }
                 printf("Goal!\n\r");
             }
 
