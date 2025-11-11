@@ -92,7 +92,7 @@ int main()
     ADC->ADC_CHER = 1;
     ADC->ADC_IER = ADC_IER_COMPE;
     ADC->ADC_EMR = ADC_EMR_CMPMODE_LOW;
-    ADC->ADC_CWR = ADC_CWR_LOWTHRES(400);
+    ADC->ADC_CWR = ADC_CWR_LOWTHRES(500);
 
     encoder_init();
 
@@ -136,7 +136,7 @@ int main()
             printf("Received message from ID 3\n");
         }
 
-
+        printf("%d\n", ADC->ADC_ISR & ADC_ISR_COMPE);
         if (game_start) // Game is running
         {
             can_rx(msg);
@@ -181,15 +181,13 @@ int main()
                 //printf("Score: %d\n\r", score);
             }
 
-            if ((ADC->ADC_ISR & ADC_ISR_COMPE) >> 26){ //Checks if a goal is registered
+            if (((ADC->ADC_ISR & ADC_ISR_COMPE) >> 26) && score > 0){ //Checks if a goal is registered
                 game_start = false; // End game
                 score = 0;
 
                 msg2.id = 1;
                 msg2.length = 0;
-                if((time_now() - time_last_solenoid) > msecs(70)) {
                 can_tx(msg2);
-                }
                 printf("Goal!\n\r");
             }
 
