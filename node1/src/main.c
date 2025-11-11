@@ -27,14 +27,13 @@ analog_input analog_data;
 // Game values
 uint8_t gamestate = 0;
 uint16_t score = 0;
-uint8_t node2_interrupt = 0;
 
 // Menus
 menu *main_menu;
 menu *current_menu;
 
 // Define functions
-void handle_node2_interrupt();
+void handle_node2_can();
 void send_inputs(joystick *joystick, uint8_t js_button, touchpad *touchpad);
 void start_new_game();
 void create_main_menu();
@@ -73,23 +72,21 @@ int main()
                 break;
             case 1:
                 _delay_ms(20); // needed so can messages arent sent too rapidly
-                // Handle the interrupt produced CAN receive
-                if (node2_interrupt)
-                {
-                    handle_node2_interrupt();
-                    node2_interrupt = 0;
-                }
+
                 uint8_t data;
                 mcp2515_read(0x1C, &data);
                 printf("TEC: %d\n", data);
                 uint8_t data2;
                 mcp2515_read(0x1D, &data2);
                 printf("REC: %d\n", data2);
+
                 analog_data = analog_read();
                 read_joystick(&joystick_1, analog_data);
                 read_touchpad(&touchpad_1);
                 uint8_t js_button = (PINB & (1 << PB0)) >> PB0 ^ 0x01;
                 send_inputs(&joystick_1, js_button, &touchpad_1);
+
+                handle_node2_can();
                 
                 break;
             default:
@@ -143,7 +140,6 @@ void calibrate_joystick()
 void start_new_game() 
 {
     gamestate = 1;
-    node2_interrupt = 0;
     score = 0;
     can_message_t message;
     message.id = 3;
@@ -191,10 +187,24 @@ void send_inputs(joystick *joystick, uint8_t js_button, touchpad *touchpad)
     
 }
 
-void handle_node2_interrupt() 
+void handle_node2_can() 
 {
+
+    uint8_t data;
+    mcp2515_read(MCP_CANINTF, &data);
+
     can_message_t msg;
-    can_receive(&msg);
+    if (data & 0x01) 
+    {
+        mcp2515_bit_modify(MCP_CANINTF, 0x01, 0x00);
+        can_receive(&msg);
+    }
+    else
+    {
+        return;
+    }
+    
+    
 
     // Game end
     if (msg.id == 1 && score >= 1) 
@@ -233,26 +243,5 @@ void handle_node2_interrupt()
         score = msg.data[0];
         oled_score(score);
     }
-
-}
-
-// Interrupt vector for CAN receive
-ISR(INT2_vect) {
-    uint8_t data;
-    mcp2515_read(MCP_CANINTF, &data);
-    printf("int_d: %d\n", data);
-
-    if (data & 0x01) {
-        mcp2515_bit_modify(MCP_CANINTF, 0x01, 0x00);
-        node2_interrupt = 1;
-    }
-    
-
-    // if (data & 0x01) {
-    //     printf("\tint\n");
-    // }
-
-    //mcp2515_read(MCP_CANINTF, &data);
-    //printf("\tint_d: %d\n", data);
 
 }

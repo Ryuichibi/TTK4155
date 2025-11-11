@@ -37,9 +37,9 @@ uint8_t mcp2515_init()
   }
 
     // Interrupt for CAN controller. Used for receiving CAN messages
-    SREG |= (1 << 7); // Enable interrupts
-    EMCUCR &= ~(0x01); // Falling edge for INT2
-    GICR |= (1 << 5); // Interupt INT2
+    //SREG |= (1 << 7); // Enable interrupts
+    //EMCUCR &= ~(0x01); // Falling edge for INT2
+    //GICR |= (1 << 5); // Interupt INT2
 
     return 0;
 }
