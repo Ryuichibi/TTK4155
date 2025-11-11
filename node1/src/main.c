@@ -27,15 +27,126 @@ analog_input analog_data;
 // Game values
 uint8_t gamestate = 0;
 uint16_t score = 0;
+uint8_t node2_interrupt = 0;
 
 // Menus
 menu *main_menu;
 menu *current_menu;
 
+// Define functions
+void handle_node2_interrupt();
+void send_inputs(joystick *joystick, uint8_t js_button, touchpad *touchpad);
+void start_new_game();
+void create_main_menu();
+void calibrate_joystick();
+
+int main()
+{
+    UART = uart_init(9600);
+    sram_init();
+    spi_init();
+    analog_init();
+    oled_init();
+    mcp2515_init();
+    mcp2515_bit_modify(0x60, 0b01100000, 0xff);
+
+    _delay_ms(5);
+
+    // Setup joystick button
+    DDRB &= ~(1 << PB0);
+    PORTB &= ~(1 << PB0);
+
+    _delay_ms(2000);
+
+    joystick_1.parameters.x_min = 50;
+    joystick_1.parameters.y_min = 50;
+
+    create_main_menu();
+
+    while(1)
+    {
+        switch (gamestate) {
+            case 0:
+                read_buttons(&buttons_1);
+                current_menu = navigate_menu(current_menu, buttons_1);
+                _delay_ms(150);
+                break;
+            case 1:
+                _delay_ms(150); // needed so can messages arent sent too rapidly
+                // Handle the interrupt produced CAN receive
+                if (node2_interrupt)
+                {
+                    handle_node2_interrupt();
+                    node2_interrupt = 0;
+                }
+                uint8_t data;
+                mcp2515_read(0x1C, &data);
+                printf("TEC: %d\n", data);
+                analog_data = analog_read();
+                read_joystick(&joystick_1, analog_data);
+                read_touchpad(&touchpad_1);
+                uint8_t js_button = (PINB & (1 << PB0)) >> PB0 ^ 0x01;
+                send_inputs(&joystick_1, js_button, &touchpad_1);
+                
+                break;
+            default:
+                printf("Error\n");
+                gamestate = 0;
+                break;
+        }
+        
+    }
+
+}
+
+
+
+void create_main_menu() 
+{
+    // Menu setup
+    main_menu = create_menu(3, NULL, NULL, 0, NULL);
+    main_menu->sub_menus[0] = create_menu(0, "New Game", main_menu, 0, start_new_game);
+    main_menu->sub_menus[1] = create_menu(2, "Scoreboard", main_menu, 0, NULL);
+    main_menu->sub_menus[2] = create_menu(0, "Cali Joystick", main_menu, 0, calibrate_joystick);
+    main_menu->sub_menus[1]->sub_menus[0] = create_menu(8, "Highscores", main_menu->sub_menus[1], 0, NULL);
+    for (uint8_t i = 0; i < 8; i++) {
+        main_menu->sub_menus[1]->sub_menus[0]->sub_menus[i] = create_menu(0, "No score", main_menu->sub_menus[1]->sub_menus[0], 0, NULL);
+    }
+    main_menu->sub_menus[1]->sub_menus[1] = create_menu(1, "Last Score", main_menu->sub_menus[1], 0, NULL);
+    main_menu->sub_menus[1]->sub_menus[1]->sub_menus[0] = create_menu(0, "No score", main_menu->sub_menus[1]->sub_menus[1], 0, NULL);
+    current_menu = main_menu;
+    print_menu(current_menu);
+}
+
+void calibrate_joystick()
+{
+    oled_reset();
+    oled_position(3,5);
+    oled_print("Spin Joystick",13);
+    _delay_ms(500);
+    for (uint8_t i = 0; i < 255; i++) {
+        analog_data = analog_read();
+        read_joystick(&joystick_1, analog_data);
+        _delay_ms(20);
+    }
+    oled_reset();
+    oled_position(3,30);
+    oled_print("Done", 4);
+    _delay_ms(2000);
+    oled_reset();
+    print_menu(current_menu);
+}
+
 void start_new_game() 
 {
     gamestate = 1;
+    node2_interrupt = 0;
     score = 0;
+    can_message_t message;
+    message.id = 1;
+    message.data_count = 0;
+    can_send(message);
+    mcp2515_request_send(0x01);
     oled_reset();
     oled_score(score);
 }
@@ -62,8 +173,7 @@ void send_inputs(joystick *joystick, uint8_t js_button, touchpad *touchpad)
     message.data[3] = touchpad->x_pos;
     message.data[4] = touchpad->y_pos;
 
-    printf("Tpad: %d\n", message.data[3]);
-    _delay_ms(150);
+    _delay_ms(10);
 
     can_send(message);
     mcp2515_request_send(0x01);
@@ -73,94 +183,33 @@ void send_inputs(joystick *joystick, uint8_t js_button, touchpad *touchpad)
     
     if (*error != 0x08) 
     {
-        printf("%01x\n", *error);
+        printf("Error: %01x\n", *error);
     } 
+    
 }
 
-int main()
+void handle_node2_interrupt() 
 {
-
-    UART = uart_init(9600);
-    sram_init();
-    spi_init();
-    analog_init();
-    oled_init();
-    mcp2515_init();
-
-    mcp2515_bit_modify(0x60, 0b01100000, 0xff);
-
-    _delay_ms(5);
-
-    // Interrupt for CAN receive
-    SREG |= (1 << 7); // Enable interrupts
-    EMCUCR &= ~(0x01); // Falling edge for INT2
-    GICR |= (1 << 5); // Interupt INT2
-
-    // Setup joystick button
-    DDRB &= ~(1 << PB0);
-    PORTB &= ~(1 << PB0);
-
-    _delay_ms(2000);
-
-    joystick_1.parameters.x_min = 50;
-    joystick_1.parameters.y_min = 50;
-
-    // Menu setup
-    main_menu = create_menu(3, NULL, NULL, 0, NULL);
-    main_menu->sub_menus[0] = create_menu(0, "New Game", main_menu, 0, start_new_game);
-    main_menu->sub_menus[1] = create_menu(2, "Scoreboard", main_menu, 0, NULL);
-    main_menu->sub_menus[2] = create_menu(0, "Cali Joystick", main_menu, 0, NULL);
-    main_menu->sub_menus[1]->sub_menus[0] = create_menu(8, "Highscores", main_menu->sub_menus[1], 0, NULL);
-    for (uint8_t i = 0; i < 8; i++) {
-        main_menu->sub_menus[1]->sub_menus[0]->sub_menus[i] = create_menu(0, "No score", main_menu->sub_menus[1]->sub_menus[0], 0, NULL);
-    }
-    main_menu->sub_menus[1]->sub_menus[1] = create_menu(1, "Last Score", main_menu->sub_menus[1], 0, NULL);
-    main_menu->sub_menus[1]->sub_menus[1]->sub_menus[0] = create_menu(0, "No score", main_menu->sub_menus[1]->sub_menus[1], 0, NULL);
-    current_menu = main_menu;
-    print_menu(current_menu);
-
-    while(1)
-    {
-        switch (gamestate) {
-            case 0:
-                read_buttons(&buttons_1);
-                current_menu = navigate_menu(current_menu, buttons_1);
-                _delay_ms(150);
-                break;
-            case 1:
-                analog_data = analog_read();
-                read_joystick(&joystick_1, analog_data);
-                read_touchpad(&touchpad_1);
-                uint8_t js_button = (PINB & (1 << PB0)) >> PB0 ^ 0x01;
-                send_inputs(&joystick_1, js_button, &touchpad_1);
-                break;
-            default:
-                printf("Error\n");
-                gamestate = 0;
-                break;
-        }
-        
-
-    }
-
-}
-
-ISR(INT2_vect) {
-    uint8_t data;
-    mcp2515_read(MCP_CANINTF, &data);
-
-    // Get CAN msg
     can_message_t msg;
     can_receive(&msg);
 
     // Game end
-    if (msg.id == 1) 
+    if (msg.id == 1 && score >= 1) 
     {
-        current_menu = main_menu->sub_menus[1]->sub_menus[1]->sub_menus[0]; // Last highscore
         gamestate = 0; // Menu mode
-        score = 0; // Reset score
         char *final_score = malloc(sizeof(char) * 4);
-        sprintf(final_score, "%d", msg.data[0]);
+
+        final_score[3] = '\0';
+        uint8_t hund = score / 100;
+        final_score[0] = (char) (hund + '0');
+        uint8_t ten = (score - hund * 100) / 10;
+        final_score[1] = (char) (ten + '0');
+        uint8_t ones = (score - hund * 100 - ten * 10);
+        final_score[2] = (char) (ones + '0');
+
+        printf("Int %s\n", final_score);
+        score = 0; // Reset score
+
         main_menu->sub_menus[1]->sub_menus[1]->sub_menus[0]->value = final_score;
         for (uint8_t i = 0; i < main_menu->sub_menus[1]->sub_menus[0]->n_entries; i++) 
         {
@@ -169,18 +218,36 @@ ISR(INT2_vect) {
                 break;
             }
         }
+        current_menu = main_menu->sub_menus[1]->sub_menus[1]; // Last highscore
+        
+        oled_reset();
+        print_menu(current_menu);
         
     }
-    // Score
+    // Update Score
     else if (msg.id == 2)
     {
         score = msg.data[0];
-        oled_reset();
         oled_score(score);
     }
-    
-    // Reset interrupt
-    mcp2515_bit_modify(MCP_CANINTF, 0x03, 0x00);
 
+}
+
+// Interrupt vector for CAN receive
+ISR(INT2_vect) {
+    uint8_t data;
+    mcp2515_read(MCP_CANINTF, &data);
+    printf("int_d: %d\n", data);
+
+    mcp2515_bit_modify(MCP_CANINTF, 0x01, 0x00);
+    node2_interrupt = 1;
+    
+
+    // if (data & 0x01) {
+    //     printf("\tint\n");
+    // }
+
+    //mcp2515_read(MCP_CANINTF, &data);
+    //printf("\tint_d: %d\n", data);
 
 }
