@@ -72,7 +72,7 @@ int main()
                 _delay_ms(150);
                 break;
             case 1:
-                _delay_ms(150); // needed so can messages arent sent too rapidly
+                _delay_ms(20); // needed so can messages arent sent too rapidly
                 // Handle the interrupt produced CAN receive
                 if (node2_interrupt)
                 {
@@ -82,6 +82,9 @@ int main()
                 uint8_t data;
                 mcp2515_read(0x1C, &data);
                 printf("TEC: %d\n", data);
+                uint8_t data2;
+                mcp2515_read(0x1D, &data2);
+                printf("REC: %d\n", data2);
                 analog_data = analog_read();
                 read_joystick(&joystick_1, analog_data);
                 read_touchpad(&touchpad_1);
@@ -143,7 +146,7 @@ void start_new_game()
     node2_interrupt = 0;
     score = 0;
     can_message_t message;
-    message.id = 1;
+    message.id = 3;
     message.data_count = 0;
     can_send(message);
     mcp2515_request_send(0x01);
@@ -154,7 +157,7 @@ void start_new_game()
 void send_inputs(joystick *joystick, uint8_t js_button, touchpad *touchpad)
 {
     can_message_t message;
-    message.id = JOYSTICK_ID;
+    message.id = 4;
     message.data_count = 5;
 
     if (joystick->x_pos > 45 && joystick->x_pos < 55)
@@ -239,8 +242,10 @@ ISR(INT2_vect) {
     mcp2515_read(MCP_CANINTF, &data);
     printf("int_d: %d\n", data);
 
-    mcp2515_bit_modify(MCP_CANINTF, 0x01, 0x00);
-    node2_interrupt = 1;
+    if (data & 0x01) {
+        mcp2515_bit_modify(MCP_CANINTF, 0x01, 0x00);
+        node2_interrupt = 1;
+    }
     
 
     // if (data & 0x01) {
