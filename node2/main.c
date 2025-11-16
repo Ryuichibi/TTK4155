@@ -17,13 +17,12 @@
 #include "lib/can.h"
 #include "lib/motor_controller.h"
 #include "lib/controller.h"
+#include "lib/ADC.h"
+#include "lib/stepper.h"
 
 #define F_CPU 84000000
 #define F_CAN F_CPU/2
 
-#define CDTY_L 0b1100001011111000u // This is 1ms
-#define CDTY_H 0b1011100001101100u // This is 2ms 
-#define CDTY_STEP_DIFF 0b11011u
 
 // Controller
 int16_t reference;
@@ -34,6 +33,11 @@ int16_t error;
 
 // Game state
 bool game_start = false;
+bool game_ended = false;
+uint16_t score = 0;
+
+//CAN
+CanMsg msg2;
 
 void TC0_Handler()
 {
@@ -58,6 +62,19 @@ void TC0_Handler()
 }
 
 
+void ADC_Handler(){
+    ADC->ADC_ISR; //Clear interrupt flag
+    if(game_start){
+        game_start = false; // End game
+        score = 0;
+
+        msg2.id = 1;
+        msg2.length = 0;
+        can_tx(msg2);
+        game_ended = true;
+    }
+ 
+}
 
 
 void score_update(int16_t score_delta)
@@ -69,45 +86,26 @@ void score_update(int16_t score_delta)
 int main()
 {
     SystemInit();
+    motor_init();
+    ADC_init();
+    encoder_init();
+    stepper_init();
 
     WDT->WDT_MR = WDT_MR_WDDIS; //Disable Watchdog Timer
     
-    PIOB->PIO_PDR |= PIO_PDR_P13;
-    PIOB->PIO_MDDR |= PIO_MDDR_P13;
-    PIOB->PIO_ABSR |= PIO_ABSR_P13;
-
     PIOB->PIO_PER |= PIO_PER_P27; // Solenoid pin
     PIOB->PIO_OER |= PIO_OER_P27; // Solenoid pin
 
-    PMC->PMC_PCER1 |= (1 << 4);
-    motor_init();
 
-    PWM->PWM_CLK |= 1;
-    PWM->PWM_CLK |= (5 << 8);
-    PWM->PWM_CH_NUM[1].PWM_CMR = 0b1011;
-    PWM->PWM_CH_NUM[1].PWM_CPRD = 0b1100110100010100;
-    PWM->PWM_CH_NUM[1].PWM_CDTY = CDTY_L;
-
-    PWM->PWM_ENA |= 2;
-
-    PMC->PMC_PCER1 |= (1 << 5);
-    ADC->ADC_MR = 0;
-    ADC->ADC_CHER = 1;
-    ADC->ADC_IER = ADC_IER_COMPE;
-    ADC->ADC_EMR = ADC_EMR_CMPMODE_LOW;
-    ADC->ADC_CWR = ADC_CWR_LOWTHRES(200);
-
-    encoder_init();
 
 
     //Uncomment after including uart above
     uart_init(F_CPU, 9600);
-    printf("Hello World\n\r");
+    printf("Node 2 started\n");
 
     can_init((CanInit){.brp = F_CPU/4000000-1, .phase1 = 5, .phase2 = 6, .propag = 1, .sjw = 3}, 0);
 
     CanMsg *msg = malloc(sizeof(CanMsg));
-    CanMsg msg2;
     msg2.id = 2;
     msg2.length = 1;
     //Byte8 data = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
@@ -116,11 +114,10 @@ int main()
     
     uint64_t time_last_solenoid = 0; 
     uint64_t time_last_score = 0;
-    uint16_t score = 0;
 
     while (1)
     {
-        ADC->ADC_CR = 2;
+        adcStartConversion();
         // Delay
         //printf("Int %d\n", ((ADC->ADC_ISR & ADC_ISR_COMPE) >> 26));
         //printf("Over: %d\n", ADC->ADC_OVER);
@@ -187,18 +184,10 @@ int main()
                         reference = -(msg->byte[3]*60) ;
             //printf("Reference set to %d\n\r", reference);
         }
-        if ((ADC->ADC_ISR & ADC_ISR_COMPE) && (score > 0) ){ //Checks if a goal is registered
-                ADC->ADC_ISR; //Clear interrupt flag
-                game_start = false; // End game
-                score = 0;
-
-                msg2.id = 1;
-                msg2.length = 0;
-                can_tx(msg2);
-                printf("Goal!\n\r");
-            }
-
-
+        if(game_ended){
+            printf("Goal!\n\r");
+            game_ended = false;
+        }
     }
     
 }

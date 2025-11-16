@@ -21,7 +21,7 @@ void encoder_init(void){
 }
 
 void motor_init(void){
-    PMC->PMC_PCER1 |= (1<<5);
+    PMC->PMC_PCER1 |= PMC_PCER1_PID36;
     PWM->PWM_CLK |= PWM_CLK_DIVA(1) | PWM_CLK_PREA(5);
 
     PIOB->PIO_PDR |= PIO_PDR_P12;
