@@ -17,6 +17,6 @@ void can_init();
 void can_send(can_message_t message);
 void can_receive(can_message_t *message);
 
-#define JOYSTICK_ID 1
+#define JOYSTICK_ID 2
 
 #endif

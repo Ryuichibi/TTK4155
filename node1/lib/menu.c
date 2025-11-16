@@ -9,19 +9,35 @@ menu *create_menu(uint8_t n_entries, char* value, menu* parent, uint8_t selected
     {
         temp->sub_menus = malloc(sizeof(menu *) * n_entries);
     }
+    else
+    {
+        temp->sub_menus = NULL;
+    }
 
     if (value)
     {
         temp->value = value;
+    }
+    else
+    {
+        temp->value = NULL;
     }
 
     if (parent)
     {
         temp->parent_menu = parent;
     }
+    else
+    {
+        temp->parent_menu = NULL;
+    }
 
     if (function_ptr) {
         temp->function_ptr = function_ptr;
+    }
+    else
+    {
+        temp->function_ptr = NULL;
     }
 
     temp->n_entries = n_entries;

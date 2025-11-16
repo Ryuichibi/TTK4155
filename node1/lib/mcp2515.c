@@ -21,7 +21,8 @@ uint8_t mcp2515_init()
     mcp2515_write(MCP_CNF2, CNF2);
     mcp2515_write(MCP_CNF3, CNF3);
 
-    mcp2515_bit_modify(MCP_CANINTE, MCP_RX_INT, MCP_RX_INT); // Enable interrupt for receiving
+    //mcp2515_bit_modify(MCP_CANINTE, 0x01, 0x01); // Enable interrupt for receiving
+    mcp2515_write(MCP_CANINTE, 0x01);
     
     mcp2515_bit_modify(MCP_RXB0CTRL, 0x60, 0xFF); //mask is set to full "dont care"
     mcp2515_bit_modify(MCP_RXB1CTRL, 0x60, 0xFF); //mask is set to full "dont care"
@@ -34,6 +35,11 @@ uint8_t mcp2515_init()
   } else {
         printf("Entered normal mode\n");
   }
+
+    // Interrupt for CAN controller. Used for receiving CAN messages
+    //SREG |= (1 << 7); // Enable interrupts
+    //EMCUCR &= ~(0x01); // Falling edge for INT2
+    //GICR |= (1 << 5); // Interupt INT2
 
     return 0;
 }
@@ -113,3 +119,4 @@ void mcp2515_reset()
 
     spi_close_com(MCP2515_SLAVE_SELECT);
 }
+
